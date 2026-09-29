@@ -55,17 +55,17 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build macOS App & DMG
+      - name: Build macOS App Bundle
         run: |
           pyinstaller --noconfirm --onedir --windowed --name "Ebook1BitOptimizer" gui.py
           cd dist
-          tar -czf Ebook1BitOptimizer-macOS.tar.gz Ebook1BitOptimizer.app
+          zip -r Ebook1BitOptimizer-macOS.zip Ebook1BitOptimizer.app
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Ebook1BitOptimizer-macOS
-          path: dist/Ebook1BitOptimizer-macOS.tar.gz
+          path: dist/Ebook1BitOptimizer-macOS.zip
 
   release:
     needs: [build-windows, build-macos]
@@ -85,8 +85,12 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: "Release ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
           files: |
             Ebook1BitOptimizer-Windows.zip
-            Ebook1BitOptimizer-macOS.tar.gz
+            Ebook1BitOptimizer-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

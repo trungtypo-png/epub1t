@@ -10,15 +10,90 @@ from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_
 from scripts.clean_large_epubs import clean_epub_artifacts
 from scripts.fix_epub_covers import fix_epub_cover
 
+TEXTS = {
+    'vi': {
+        'app_title': "Ebook Convert & 1-Bit Optimizer 📚",
+        'title': "Ebook 1-Bit Mono & EPUB Optimizer",
+        'subtitle': "Chuyển đổi sách chữ & tối ưu hoá PDF scan sang EPUB siêu nhẹ",
+        'lang_label': "Ngôn ngữ:",
+        'path_group': " 📂 Chọn File hoặc Thư Mục Sách ",
+        'btn_file': "Chọn File...",
+        'btn_dir': "Chọn Thư Mục...",
+        'opts_group': " ⚙️ Tùy Chọn Chuyển Đổi ",
+        'mode_label': "Chế độ PDF Scan:",
+        'mode_1bit': "1-Bit Monochrome (Siêu nét & nhẹ)",
+        'mode_color': "Màu gốc (Color)",
+        'mode_gray': "Xám (Grayscale)",
+        'chk_cover': "Tự động sửa ảnh bìa gốc (Cover Fix)",
+        'chk_clean': "Khử trang trắng & layer rác",
+        'chk_del': "Xóa file nguồn cũ sau khi xong",
+        'log_group': " 📝 Tiến Trình Xử Lý ",
+        'btn_run': "🚀 BẮT ĐẦU CHUYỂN ĐỔI",
+        'btn_running': "⏳ ĐANG XỬ LÝ...",
+        'file_dialog_title': "Chọn File Sách",
+        'dir_dialog_title': "Chọn Thư Mục Chứa Sách",
+        'warn_path': "Vui lòng chọn một file hoặc thư mục hợp lệ!",
+        'warn_title': "Cảnh báo",
+        'success_title': "Thành công",
+        'success_msg': "Đã xử lý xong {count} file!",
+        'log_start': "=== BẮT ĐẦU QUY TRÌNH: {path} ===",
+        'log_found': "Tìm thấy {count} file cần xử lý...\n",
+        'log_proc': "[{i}/{total}] Đang xử lý: {fn}",
+        'log_clean': "   -> Dọn layer rác: {msg}",
+        'log_cover': "   -> Đã sửa bìa ({desc})",
+        'log_result': "   -> Kết quả: {status} ({res})",
+        'log_del': "   -> Đã xóa file nguồn an toàn.",
+        'log_done': "\n=== HOÀN TẤT TOÀN BỘ QUY TRÌNH ===",
+        'status_ok': "Thành công",
+        'status_fail': "Thất bại",
+    },
+    'en': {
+        'app_title': "Ebook Convert & 1-Bit Optimizer 📚",
+        'title': "Ebook 1-Bit Mono & EPUB Optimizer",
+        'subtitle': "Convert books & optimize scanned PDFs into lightweight EPUBs",
+        'lang_label': "Language:",
+        'path_group': " 📂 Select Book File or Directory ",
+        'btn_file': "Browse File...",
+        'btn_dir': "Browse Folder...",
+        'opts_group': " ⚙️ Conversion Options ",
+        'mode_label': "Scanned PDF Mode:",
+        'mode_1bit': "1-Bit Monochrome (Sharp & Ultra Light)",
+        'mode_color': "Original Color",
+        'mode_gray': "Grayscale",
+        'chk_cover': "Auto Restore Real Cover",
+        'chk_clean': "Clean Ghost Blank Pages & Artifacts",
+        'chk_del': "Safely Delete Source Files",
+        'log_group': " 📝 Processing Logs ",
+        'btn_run': "🚀 START CONVERSION",
+        'btn_running': "⏳ PROCESSING...",
+        'file_dialog_title': "Select Ebook File",
+        'dir_dialog_title': "Select Ebook Directory",
+        'warn_path': "Please select a valid file or directory!",
+        'warn_title': "Warning",
+        'success_title': "Success",
+        'success_msg': "Processed {count} file(s) successfully!",
+        'log_start': "=== STARTING PIPELINE: {path} ===",
+        'log_found': "Found {count} file(s) to process...\n",
+        'log_proc': "[{i}/{total}] Processing: {fn}",
+        'log_clean': "   -> Cleaned artifacts: {msg}",
+        'log_cover': "   -> Restored cover ({desc})",
+        'log_result': "   -> Result: {status} ({res})",
+        'log_del': "   -> Source file deleted safely.",
+        'log_done': "\n=== PIPELINE FINISHED ===",
+        'status_ok': "Success",
+        'status_fail': "Failed",
+    }
+}
+
 
 class EbookConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Ebook Convert & 1-Bit Optimizer 📚")
-        self.geometry("640x560")
-        self.minsize(580, 480)
+        self.geometry("680x590")
+        self.minsize(620, 500)
 
         # Variables
+        self.lang = "vi"
         self.path_var = tk.StringVar()
         self.mode_var = tk.StringVar(value="1bit")
         self.del_src_var = tk.BooleanVar(value=False)
@@ -27,65 +102,82 @@ class EbookConverterApp(tk.Tk):
         self.is_processing = False
 
         self._build_ui()
+        self.apply_language("vi")
 
     def _build_ui(self):
         # Header Frame
         header = ttk.Frame(self, padding="15 15 15 10")
         header.pack(fill=tk.X)
 
-        title_lbl = ttk.Label(header, text="Ebook 1-Bit Mono & EPUB Optimizer", font=("Segoe UI", 14, "bold"))
-        title_lbl.pack(anchor=tk.W)
-        subtitle_lbl = ttk.Label(header, text="Chuyển đổi sách chữ & tối ưu hoá PDF scan sang EPUB siêu nhẹ", font=("Segoe UI", 9))
-        subtitle_lbl.pack(anchor=tk.W, pady=(2, 0))
+        title_frame = ttk.Frame(header)
+        title_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        self.title_lbl = ttk.Label(title_frame, text="", font=("Segoe UI", 14, "bold"))
+        self.title_lbl.pack(anchor=tk.W)
+        self.subtitle_lbl = ttk.Label(title_frame, text="", font=("Segoe UI", 9))
+        self.subtitle_lbl.pack(anchor=tk.W, pady=(2, 0))
+
+        # Language Switcher
+        lang_frame = ttk.Frame(header)
+        lang_frame.pack(side=tk.RIGHT, anchor=tk.E)
+
+        self.lang_lbl = ttk.Label(lang_frame, text="", font=("Segoe UI", 9))
+        self.lang_lbl.pack(side=tk.LEFT, padx=(0, 6))
+
+        self.lang_combo = ttk.Combobox(lang_frame, values=["Tiếng Việt", "English"], state="readonly", width=11)
+        self.lang_combo.current(0)
+        self.lang_combo.bind("<<ComboboxSelected>>", self._on_lang_changed)
+        self.lang_combo.pack(side=tk.LEFT)
 
         # Main Content Frame
         content = ttk.Frame(self, padding="15 0 15 10")
         content.pack(fill=tk.BOTH, expand=True)
 
         # File/Folder Selection
-        path_group = ttk.LabelFrame(content, text=" 📂 Chọn File hoặc Thư Mục Sách ", padding="10")
-        path_group.pack(fill=tk.X, pady=(0, 10))
+        self.path_group = ttk.LabelFrame(content, text="", padding="10")
+        self.path_group.pack(fill=tk.X, pady=(0, 10))
 
-        path_entry = ttk.Entry(path_group, textvariable=self.path_var, font=("Segoe UI", 9))
+        path_entry = ttk.Entry(self.path_group, textvariable=self.path_var, font=("Segoe UI", 9))
         path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
 
-        btn_file = ttk.Button(path_group, text="Chọn File...", command=self._browse_file)
-        btn_file.pack(side=tk.LEFT, padx=(0, 4))
-        btn_dir = ttk.Button(path_group, text="Chọn Thư Mục...", command=self._browse_dir)
-        btn_dir.pack(side=tk.LEFT)
+        self.btn_file = ttk.Button(self.path_group, text="", command=self._browse_file)
+        self.btn_file.pack(side=tk.LEFT, padx=(0, 4))
+        self.btn_dir = ttk.Button(self.path_group, text="", command=self._browse_dir)
+        self.btn_dir.pack(side=tk.LEFT)
 
         # Options Group
-        opts_group = ttk.LabelFrame(content, text=" ⚙️ Tùy Chọn Chuyển Đổi ", padding="10")
-        opts_group.pack(fill=tk.X, pady=(0, 10))
+        self.opts_group = ttk.LabelFrame(content, text="", padding="10")
+        self.opts_group.pack(fill=tk.X, pady=(0, 10))
 
         # Mode Selection
-        mode_frame = ttk.Frame(opts_group)
+        mode_frame = ttk.Frame(self.opts_group)
         mode_frame.pack(fill=tk.X, pady=(0, 8))
-        ttk.Label(mode_frame, text="Chế độ PDF Scan:", font=("Segoe UI", 9, "bold")).pack(side=tk.LEFT, padx=(0, 10))
+        self.mode_lbl = ttk.Label(mode_frame, text="", font=("Segoe UI", 9, "bold"))
+        self.mode_lbl.pack(side=tk.LEFT, padx=(0, 10))
 
-        r1 = ttk.Radiobutton(mode_frame, text="1-Bit Monochrome (Siêu nét & nhẹ)", variable=self.mode_var, value="1bit")
-        r1.pack(side=tk.LEFT, padx=(0, 10))
-        r2 = ttk.Radiobutton(mode_frame, text="Màu gốc (Color)", variable=self.mode_var, value="color")
-        r2.pack(side=tk.LEFT, padx=(0, 10))
-        r3 = ttk.Radiobutton(mode_frame, text="Xám (Grayscale)", variable=self.mode_var, value="grayscale")
-        r3.pack(side=tk.LEFT)
+        self.r1 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="1bit")
+        self.r1.pack(side=tk.LEFT, padx=(0, 10))
+        self.r2 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="color")
+        self.r2.pack(side=tk.LEFT, padx=(0, 10))
+        self.r3 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="grayscale")
+        self.r3.pack(side=tk.LEFT)
 
         # Checkboxes
-        chk_frame = ttk.Frame(opts_group)
+        chk_frame = ttk.Frame(self.opts_group)
         chk_frame.pack(fill=tk.X)
-        c1 = ttk.Checkbutton(chk_frame, text="Tự động sửa ảnh bìa gốc (Cover Fix)", variable=self.fix_cover_var)
-        c1.pack(side=tk.LEFT, padx=(0, 15))
-        c2 = ttk.Checkbutton(chk_frame, text="Khử trang trắng & layer rác", variable=self.clean_art_var)
-        c2.pack(side=tk.LEFT, padx=(0, 15))
-        c3 = ttk.Checkbutton(chk_frame, text="Xóa file nguồn cũ sau khi xong", variable=self.del_src_var)
-        c3.pack(side=tk.LEFT)
+        self.c1 = ttk.Checkbutton(chk_frame, text="", variable=self.fix_cover_var)
+        self.c1.pack(side=tk.LEFT, padx=(0, 15))
+        self.c2 = ttk.Checkbutton(chk_frame, text="", variable=self.clean_art_var)
+        self.c2.pack(side=tk.LEFT, padx=(0, 15))
+        self.c3 = ttk.Checkbutton(chk_frame, text="", variable=self.del_src_var)
+        self.c3.pack(side=tk.LEFT)
 
         # Log Text Box
-        log_group = ttk.LabelFrame(content, text=" 📝 Tiến Trình Xử Lý ", padding="5")
-        log_group.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        self.log_group = ttk.LabelFrame(content, text="", padding="5")
+        self.log_group.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
-        self.log_text = tk.Text(log_group, wrap=tk.WORD, font=("Consolas", 8), bg="#1E1E1E", fg="#D4D4D4")
-        scrollbar = ttk.Scrollbar(log_group, orient=tk.VERTICAL, command=self.log_text.yview)
+        self.log_text = tk.Text(self.log_group, wrap=tk.WORD, font=("Consolas", 8), bg="#1E1E1E", fg="#D4D4D4")
+        scrollbar = ttk.Scrollbar(self.log_group, orient=tk.VERTICAL, command=self.log_text.yview)
         self.log_text.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -97,19 +189,55 @@ class EbookConverterApp(tk.Tk):
         self.progress = ttk.Progressbar(bottom_frame, mode='indeterminate')
         self.progress.pack(fill=tk.X, pady=(0, 8))
 
-        self.btn_run = ttk.Button(bottom_frame, text="🚀 BẮT ĐẦU CHUYỂN ĐỔI", command=self._start_processing)
+        self.btn_run = ttk.Button(bottom_frame, text="", command=self._start_processing)
         self.btn_run.pack(fill=tk.X, ipady=4)
 
+    def _on_lang_changed(self, event=None):
+        selected = self.lang_combo.get()
+        new_lang = "vi" if selected == "Tiếng Việt" else "en"
+        self.apply_language(new_lang)
+
+    def apply_language(self, lang):
+        self.lang = lang
+        t = TEXTS[lang]
+
+        self.title(t['app_title'])
+        self.title_lbl.config(text=t['title'])
+        self.subtitle_lbl.config(text=t['subtitle'])
+        self.lang_lbl.config(text=t['lang_label'])
+
+        self.path_group.config(text=t['path_group'])
+        self.btn_file.config(text=t['btn_file'])
+        self.btn_dir.config(text=t['btn_dir'])
+
+        self.opts_group.config(text=t['opts_group'])
+        self.mode_lbl.config(text=t['mode_label'])
+        self.r1.config(text=t['mode_1bit'])
+        self.r2.config(text=t['mode_color'])
+        self.r3.config(text=t['mode_gray'])
+
+        self.c1.config(text=t['chk_cover'])
+        self.c2.config(text=t['chk_clean'])
+        self.c3.config(text=t['chk_del'])
+
+        self.log_group.config(text=t['log_group'])
+        if not self.is_processing:
+            self.btn_run.config(text=t['btn_run'])
+        else:
+            self.btn_run.config(text=t['btn_running'])
+
     def _browse_file(self):
+        t = TEXTS[self.lang]
         f = filedialog.askopenfilename(
-            title="Chọn File Sách",
+            title=t['file_dialog_title'],
             filetypes=[("Ebooks & Documents", "*.pdf *.mobi *.prc *.azw *.azw3 *.docx *.doc *.fb2"), ("All files", "*.*")]
         )
         if f:
             self.path_var.set(f)
 
     def _browse_dir(self):
-        d = filedialog.askdirectory(title="Chọn Thư Mục Chứa Sách")
+        t = TEXTS[self.lang]
+        d = filedialog.askdirectory(title=t['dir_dialog_title'])
         if d:
             self.path_var.set(d)
 
@@ -119,23 +247,25 @@ class EbookConverterApp(tk.Tk):
         self.update_idletasks()
 
     def _start_processing(self):
+        t = TEXTS[self.lang]
         target = self.path_var.get().strip()
         if not target or not os.path.exists(target):
-            messagebox.showwarning("Cảnh báo", "Vui lòng chọn một file hoặc thư mục hợp lệ!")
+            messagebox.showwarning(t['warn_title'], t['warn_path'])
             return
 
         if self.is_processing:
             return
 
         self.is_processing = True
-        self.btn_run.config(state=tk.DISABLED)
+        self.btn_run.config(state=tk.DISABLED, text=t['btn_running'])
         self.progress.start(10)
         self.log_text.delete(1.0, tk.END)
-        self.log(f"=== BẮT ĐẦU QUY TRÌNH: {target} ===")
+        self.log(t['log_start'].format(path=target))
 
         threading.Thread(target=self._run_worker, args=(target,), daemon=True).start()
 
     def _run_worker(self, target):
+        t = TEXTS[self.lang]
         try:
             mode = self.mode_var.get()
             del_src = self.del_src_var.get()
@@ -152,43 +282,45 @@ class EbookConverterApp(tk.Tk):
                         if ext in ['.pdf', '.prc', '.mobi', '.azw', '.azw3', '.docx', '.doc', '.fb2', '.epub']:
                             files.append(os.path.join(root, fn))
 
-            self.log(f"Tìm thấy {len(files)} file cần xử lý...\n")
+            self.log(t['log_found'].format(count=len(files)))
 
             for i, f in enumerate(files, 1):
                 fn = os.path.basename(f)
                 ext = os.path.splitext(fn)[1].lower()
-                self.log(f"[{i}/{len(files)}] Đang xử lý: {fn}")
+                self.log(t['log_proc'].format(i=i, total=len(files), fn=fn))
 
                 if ext == '.epub':
                     if clean_art:
                         ok, msg = clean_epub_artifacts(f)
                         if ok:
-                            self.log(f"   -> Dọn layer rác: {msg}")
+                            self.log(t['log_clean'].format(msg=msg))
                     if fix_cov:
                         ok, desc = fix_epub_cover(f)
                         if ok:
-                            self.log(f"   -> Đã sửa bìa ({desc})")
+                            self.log(t['log_cover'].format(desc=desc))
                 elif ext == '.pdf':
                     ok, res = convert_scanned_pdf_to_epub(f, mode=mode)
-                    self.log(f"   -> Kết quả: {'Thành công' if ok else 'Thất bại'} ({res})")
+                    status_str = t['status_ok'] if ok else t['status_fail']
+                    self.log(t['log_result'].format(status=status_str, res=res))
                     if ok and del_src:
                         os.remove(f)
-                        self.log("   -> Đã xóa file PDF nguồn an toàn.")
+                        self.log(t['log_del'])
                 else:
                     ok, res = convert_document_to_epub(f, delete_source=del_src, auto_fix_cover=fix_cov)
-                    self.log(f"   -> Kết quả: {'Thành công' if ok else 'Thất bại'}")
+                    status_str = t['status_ok'] if ok else t['status_fail']
+                    self.log(t['log_result'].format(status=status_str, res=os.path.basename(res) if ok else res))
                     if ok and clean_art:
                         clean_epub_artifacts(res)
 
-            self.log("\n=== HOÀN TẤT TOÀN BỘ QUY TRÌNH ===")
-            messagebox.showinfo("Thành công", f"Đã xử lý xong {len(files)} file!")
+            self.log(t['log_done'])
+            messagebox.showinfo(t['success_title'], t['success_msg'].format(count=len(files)))
         except Exception as e:
-            self.log(f"\n[LỖI]: {str(e)}")
-            messagebox.showerror("Lỗi", str(e))
+            self.log(f"\n[ERROR]: {str(e)}")
+            messagebox.showerror("Error", str(e))
         finally:
             self.is_processing = False
             self.progress.stop()
-            self.btn_run.config(state=tk.NORMAL)
+            self.btn_run.config(state=tk.NORMAL, text=t['btn_run'])
 
 
 if __name__ == "__main__":

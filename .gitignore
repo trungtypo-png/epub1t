@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# PyInstaller build outputs
+build/
+dist/
+*.spec
+
 # Temporary ebook conversion files
 *.tmp
 *.temp
