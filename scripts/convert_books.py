@@ -13,13 +13,24 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
 
-def get_calibre_path():
+def get_calibre_path(custom_path=None):
     """
     Dynamically locate the Calibre ebook-convert binary from:
-    1. CALIBRE_PATH environment variable
-    2. System PATH
-    3. Common platform default installation directories
+    1. Explicit custom_path argument
+    2. CALIBRE_PATH environment variable
+    3. System PATH
+    4. Common platform default and portable installation directories
     """
+    if custom_path and os.path.exists(custom_path):
+        if os.path.isdir(custom_path):
+            exe = os.path.join(custom_path, 'ebook-convert.exe')
+            if os.path.exists(exe):
+                return exe
+            exe_sub = os.path.join(custom_path, 'Calibre', 'ebook-convert.exe')
+            if os.path.exists(exe_sub):
+                return exe_sub
+        return custom_path
+
     env_path = os.environ.get('CALIBRE_PATH')
     if env_path and os.path.exists(env_path):
         return env_path
@@ -31,6 +42,10 @@ def get_calibre_path():
     candidates = [
         r'C:\Program Files\Calibre2\ebook-convert.exe',
         r'C:\Program Files (x86)\Calibre2\ebook-convert.exe',
+        r'C:\Calibre Portable\Calibre\ebook-convert.exe',
+        r'D:\Calibre Portable\Calibre\ebook-convert.exe',
+        r'E:\Calibre Portable\Calibre\ebook-convert.exe',
+        r'F:\Calibre Portable\Calibre\ebook-convert.exe',
         '/Applications/calibre.app/Contents/MacOS/ebook-convert',
         '/usr/bin/ebook-convert',
         '/usr/local/bin/ebook-convert',
@@ -42,6 +57,7 @@ def get_calibre_path():
 
 
 CALIBRE_CONVERT = get_calibre_path()
+
 
 
 def is_valid_epub(epub_path):

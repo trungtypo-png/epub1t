@@ -1,14 +1,17 @@
 import os
 import sys
+import json
 import threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
 # Ensure scripts folder is importable
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub
+from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub, get_calibre_path
 from scripts.clean_large_epubs import clean_epub_artifacts
 from scripts.fix_epub_covers import fix_epub_cover
+
+CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".ebook_1bit_optimizer_config.json")
 
 TEXTS = {
     'vi': {
@@ -27,6 +30,11 @@ TEXTS = {
         'chk_cover': "Tự động sửa ảnh bìa gốc (Cover Fix)",
         'chk_clean': "Khử trang trắng & layer rác",
         'chk_del': "Xóa file nguồn cũ sau khi xong",
+        'calibre_group': " 🔌 Calibre CLI (Tùy chọn cho sách chữ PRC/MOBI/DOCX) ",
+        'calibre_detected': "🟢 Đã nhận diện Calibre: {path}",
+        'calibre_not_found': "🟡 Chưa tìm thấy Calibre (Chỉ cần nếu convert PRC/MOBI)",
+        'btn_calibre_browse': "Đổi đường dẫn...",
+        'calibre_dialog_title': "Chọn file ebook-convert hoặc thư mục Calibre Portable",
         'log_group': " 📝 Tiến Trình Xử Lý ",
         'btn_run': "🚀 BẮT ĐẦU CHUYỂN ĐỔI",
         'btn_running': "⏳ ĐANG XỬ LÝ...",
@@ -63,6 +71,11 @@ TEXTS = {
         'chk_cover': "Auto Restore Real Cover",
         'chk_clean': "Clean Ghost Blank Pages & Artifacts",
         'chk_del': "Safely Delete Source Files",
+        'calibre_group': " 🔌 Calibre CLI (Optional for PRC/MOBI/DOCX text books) ",
+        'calibre_detected': "🟢 Calibre Detected: {path}",
+        'calibre_not_found': "🟡 Calibre not found (Only needed for PRC/MOBI)",
+        'btn_calibre_browse': "Browse Path...",
+        'calibre_dialog_title': "Select ebook-convert binary or Calibre Portable directory",
         'log_group': " 📝 Processing Logs ",
         'btn_run': "🚀 START CONVERSION",
         'btn_running': "⏳ PROCESSING...",
@@ -89,11 +102,12 @@ TEXTS = {
 class EbookConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("680x590")
-        self.minsize(620, 500)
+        self.geometry("680x640")
+        self.minsize(620, 520)
 
         # Variables
         self.lang = "vi"
+        self.custom_calibre_path = self._load_config().get("calibre_path", "")
         self.path_var = tk.StringVar()
         self.mode_var = tk.StringVar(value="1bit")
         self.del_src_var = tk.BooleanVar(value=False)
@@ -103,6 +117,22 @@ class EbookConverterApp(tk.Tk):
 
         self._build_ui()
         self.apply_language("vi")
+
+    def _load_config(self):
+        try:
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except Exception:
+            pass
+        return {}
+
+    def _save_config(self):
+        try:
+            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+                json.dump({"calibre_path": self.custom_calibre_path}, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
 
     def _build_ui(self):
         # Header Frame
@@ -135,7 +165,7 @@ class EbookConverterApp(tk.Tk):
 
         # File/Folder Selection
         self.path_group = ttk.LabelFrame(content, text="", padding="10")
-        self.path_group.pack(fill=tk.X, pady=(0, 10))
+        self.path_group.pack(fill=tk.X, pady=(0, 8))
 
         path_entry = ttk.Entry(self.path_group, textvariable=self.path_var, font=("Segoe UI", 9))
         path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
@@ -147,7 +177,7 @@ class EbookConverterApp(tk.Tk):
 
         # Options Group
         self.opts_group = ttk.LabelFrame(content, text="", padding="10")
-        self.opts_group.pack(fill=tk.X, pady=(0, 10))
+        self.opts_group.pack(fill=tk.X, pady=(0, 8))
 
         # Mode Selection
         mode_frame = ttk.Frame(self.opts_group)
@@ -172,9 +202,19 @@ class EbookConverterApp(tk.Tk):
         self.c3 = ttk.Checkbutton(chk_frame, text="", variable=self.del_src_var)
         self.c3.pack(side=tk.LEFT)
 
+        # Calibre Engine Status & Settings Frame
+        self.calibre_group = ttk.LabelFrame(content, text="", padding="8")
+        self.calibre_group.pack(fill=tk.X, pady=(0, 8))
+
+        self.calibre_status_lbl = ttk.Label(self.calibre_group, text="", font=("Segoe UI", 8))
+        self.calibre_status_lbl.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
+
+        self.btn_calibre = ttk.Button(self.calibre_group, text="", command=self._browse_calibre)
+        self.btn_calibre.pack(side=tk.RIGHT)
+
         # Log Text Box
         self.log_group = ttk.LabelFrame(content, text="", padding="5")
-        self.log_group.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        self.log_group.pack(fill=tk.BOTH, expand=True, pady=(0, 8))
 
         self.log_text = tk.Text(self.log_group, wrap=tk.WORD, font=("Consolas", 8), bg="#1E1E1E", fg="#D4D4D4")
         scrollbar = ttk.Scrollbar(self.log_group, orient=tk.VERTICAL, command=self.log_text.yview)
@@ -196,6 +236,25 @@ class EbookConverterApp(tk.Tk):
         selected = self.lang_combo.get()
         new_lang = "vi" if selected == "Tiếng Việt" else "en"
         self.apply_language(new_lang)
+
+    def _update_calibre_status(self):
+        t = TEXTS[self.lang]
+        calibre_bin = get_calibre_path(self.custom_calibre_path)
+        if calibre_bin and os.path.exists(calibre_bin):
+            self.calibre_status_lbl.config(text=t['calibre_detected'].format(path=calibre_bin), foreground="#2E7D32")
+        else:
+            self.calibre_status_lbl.config(text=t['calibre_not_found'], foreground="#E65100")
+
+    def _browse_calibre(self):
+        t = TEXTS[self.lang]
+        f = filedialog.askopenfilename(
+            title=t['calibre_dialog_title'],
+            filetypes=[("Calibre Executable", "ebook-convert.exe ebook-convert"), ("All files", "*.*")]
+        )
+        if f:
+            self.custom_calibre_path = f
+            self._save_config()
+            self._update_calibre_status()
 
     def apply_language(self, lang):
         self.lang = lang
@@ -219,6 +278,10 @@ class EbookConverterApp(tk.Tk):
         self.c1.config(text=t['chk_cover'])
         self.c2.config(text=t['chk_clean'])
         self.c3.config(text=t['chk_del'])
+
+        self.calibre_group.config(text=t['calibre_group'])
+        self.btn_calibre.config(text=t['btn_calibre_browse'])
+        self._update_calibre_status()
 
         self.log_group.config(text=t['log_group'])
         if not self.is_processing:
