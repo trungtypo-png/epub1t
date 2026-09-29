@@ -6,6 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
 
 ---
 
@@ -21,26 +22,31 @@
 
 ## 📦 Prerequisites & Installation
 
-### 1. Calibre CLI
-- Download from the [Official Calibre Site](https://calibre-ebook.com/download) or use Calibre Portable.
-- Ensure `ebook-convert` is in your `PATH`, or specify its path via the `CALIBRE_PATH` environment variable:
-  - *Windows:* `C:\Program Files\Calibre2\ebook-convert.exe` or `D:\Calibre Portable\Calibre\ebook-convert.exe`
-  - *macOS:* `/Applications/calibre.app/Contents/MacOS/ebook-convert`
-  - *Linux:* `/usr/bin/ebook-convert`
+### 1. Download Standalone App (No Python required)
+Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)** page:
+* **Windows:** Download `Ebook1BitOptimizer-Windows.zip` (extract and run `Ebook1BitOptimizer.exe`).
+* **macOS:** Download `Ebook1BitOptimizer-macOS.tar.gz`.
 
-### 2. Python Dependencies
-Requires **Python 3.9+**:
+### 2. Or Run from Source (Python 3.9+)
 ```bash
 git clone https://github.com/trungtypo-png/ebook-convert-1bitmono.git
 cd ebook-convert-1bitmono
 pip install -r requirements.txt
+python gui.py
 ```
+
+### 3. Optional Engine: Calibre CLI
+* Only needed when converting legacy reflowable books (`.prc`, `.mobi`, `.azw3`, `.docx`).
+* Download from [Calibre Official Site](https://calibre-ebook.com/download) or use Calibre Portable.
 
 ---
 
 ## 🚀 Usage
 
-### 1. Convert Ebooks & Scanned PDFs
+### 1. Graphical Interface (GUI)
+Run `python gui.py` or double-click the pre-built executable.
+
+### 2. Command Line Interface (CLI)
 ```bash
 # Convert a folder of books/PDFs (Default 1-bit mode for scans)
 python scripts/convert_books.py "/path/to/books" --mode 1bit
@@ -48,30 +54,23 @@ python scripts/convert_books.py "/path/to/books" --mode 1bit
 # Convert and safely remove source files upon success
 python scripts/convert_books.py "/path/to/books" --delete-source
 
-# Convert scanned PDF preserving RGB color or grayscale
-python scripts/convert_books.py "/path/to/book.pdf" --mode color
-```
-
-### 2. Clean Multi-layer Artifacts & Blank Pages
-```bash
+# Clean multi-layer artifacts & ghost blank pages
 python scripts/clean_large_epubs.py "/path/to/books"
-```
 
-### 3. Fix & Restore Real Book Covers
-```bash
+# Fix & restore real book covers
 python scripts/fix_epub_covers.py "/path/to/books"
 ```
 
-### 4. Python API
-```python
-from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub
+---
 
-# Convert PRC / MOBI / AZW3 / DOCX
-success, output_path = convert_document_to_epub("book.mobi", delete_source=False)
+## 🤝 Acknowledgements & Credits
 
-# Convert scanned PDF to 1-bit monochrome EPUB
-success, output_path = convert_scanned_pdf_to_epub("scan.pdf", mode="1bit", dpi_scale=1.5)
-```
+Special thanks to the creators and maintainers of the open-source projects that inspire and power this pipeline:
+
+* **[Calibre](https://github.com/kovidgoyal/calibre)** by *Kovid Goyal* and contributors — The gold standard for digital ebook conversion and management.
+* **[Kindle Comic Converter (KCC)](https://github.com/ciromattia/kcc)** by *Ciro Mattia*, *Darío Marcelino* and contributors — Pioneer in comic/manga e-reader optimization.
+* **[PyMuPDF (FitZ)](https://github.com/pymupdf/PyMuPDF)** by *Artifex Software* & the *PyMuPDF Team* — High-performance PDF rendering and extraction.
+* **[Pillow (PIL)](https://github.com/python-pillow/Pillow)** by *Jeffrey A. Clark* and contributors — Python imaging library.
 
 ---
 

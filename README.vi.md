@@ -6,6 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
 
 ---
 
@@ -19,59 +20,57 @@
 
 ---
 
-## 📦 Yêu Cầu Phần Mềm & Cài Đặt
+## 📦 Cài Đặt & Sử Dụng
 
-### 1. Calibre (Bắt buộc cho sách chữ / chuyển đổi reflowable)
-- Tải về từ [Trang chủ Calibre](https://calibre-ebook.com/download) (hoặc dùng bản Calibre Portable).
-- Đảm bảo lệnh `ebook-convert` đã có trong biến môi trường `PATH`, hoặc đặt biến môi trường `CALIBRE_PATH` trỏ tới file thực thi:
-  - *Windows:* `C:\Program Files\Calibre2\ebook-convert.exe` hoặc `D:\Calibre Portable\Calibre\ebook-convert.exe`
-  - *macOS:* `/Applications/calibre.app/Contents/MacOS/ebook-convert`
-  - *Linux:* `/usr/bin/ebook-convert`
+### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
+Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)**:
+* **Windows:** Tải file `Ebook1BitOptimizer-Windows.zip` (giải nén và chạy `Ebook1BitOptimizer.exe`).
+* **macOS:** Tải file `Ebook1BitOptimizer-macOS.tar.gz`.
 
-### 2. Cài Đặt Thư Viện Python
-Yêu cầu **Python 3.9+**:
+### 2. Hoặc Chạy Trực Tiếp Bằng Python 3.9+
 ```bash
 git clone https://github.com/trungtypo-png/ebook-convert-1bitmono.git
 cd ebook-convert-1bitmono
 pip install -r requirements.txt
+python gui.py
 ```
+
+### 3. Công cụ Calibre (Tùy chọn cho sách chữ)
+* Chỉ cần khi chuyển đổi sách chữ định dạng cổ (`.prc`, `.mobi`, `.azw3`, `.docx`).
+* Tải về tại [Trang chủ Calibre](https://calibre-ebook.com/download) (hoặc bản Calibre Portable).
 
 ---
 
 ## 🚀 Hướng Dẫn Sử Dụng
 
-### 1. Chuyển Đổi Sách & Tài Liệu Scan
+### 1. Giao Diện Đồ Họa (GUI)
+Chạy `python gui.py` hoặc click đúp file `.exe` / app đã đóng gói.
+
+### 2. Dòng Lệnh (CLI)
 ```bash
-# Chuyển đổi toàn bộ tài liệu trong thư mục (Chế độ 1-bit monochrome cho PDF scan)
+# Chuyển đổi toàn bộ thư mục sách/PDF (Chế độ 1-bit scan)
 python scripts/convert_books.py "/duong/dan/thu/muc/sach" --mode 1bit
 
-# Chuyển đổi và tự động xóa file gốc sau khi tạo EPUB thành công
+# Chuyển đổi và xóa an toàn file gốc
 python scripts/convert_books.py "/duong/dan/thu/muc/sach" --delete-source
 
-# Chuyển đổi PDF scan giữ nguyên màu gốc (color) hoặc xám (grayscale)
-python scripts/convert_books.py "/duong/dan/sach.pdf" --mode color
-```
-
-### 2. Quét & Khử Trang Trắng / Layer Rác Toàn Thư Viện
-```bash
+# Dọn sạch trang trắng & layer rác
 python scripts/clean_large_epubs.py "/duong/dan/thu/muc/sach"
-```
 
-### 3. Tự Động Sửa Bìa Cho Toàn Bộ EPUB
-```bash
+# Sửa bìa minh họa gốc
 python scripts/fix_epub_covers.py "/duong/dan/thu/muc/sach"
 ```
 
-### 4. Sử Dụng Trực Tiếp Trong Code Python
-```python
-from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub
+---
 
-# Chuyển đổi sách chữ PRC / MOBI / AZW3 / DOCX sang EPUB
-success, output_path = convert_document_to_epub("sach.mobi", delete_source=False)
+## 🤝 Lời Cảm Ơn & Ghi Nhận Đóng Góp (Credits & Contributors)
 
-# Chuyển đổi PDF scan sang EPUB 1-bit monochrome siêu nét & nhẹ
-success, output_path = convert_scanned_pdf_to_epub("sach_scan.pdf", mode="1bit", dpi_scale=1.5)
-```
+Dự án xin gửi lời cảm ơn trân trọng đến các tác giả và cộng đồng các dự án mã nguồn mở tuyệt vời:
+
+* **[Calibre](https://github.com/kovidgoyal/calibre)** phát triển bởi *Kovid Goyal* và các cộng tác viên — Công cụ tiêu chuẩn hàng đầu thế giới về quản lý và chuyển đổi ebook.
+* **[Kindle Comic Converter (KCC)](https://github.com/ciromattia/kcc)** phát triển bởi *Ciro Mattia*, *Darío Marcelino* và cộng đồng — Nền tảng tiên phong tối ưu truyện tranh cho thiết bị đọc sách e-reader.
+* **[PyMuPDF (FitZ)](https://github.com/pymupdf/PyMuPDF)** phát triển bởi *Artifex Software* & đội ngũ *PyMuPDF* — Engine trích xuất và render PDF tốc độ cao.
+* **[Pillow (PIL)](https://github.com/python-pillow/Pillow)** bởi *Jeffrey A. Clark* và cộng tác viên — Thư viện xử lý hình ảnh cốt lõi trong Python.
 
 ---
 
