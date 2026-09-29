@@ -9,6 +9,7 @@
 [![Release](https://img.shields.io/badge/Release-v1.0.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
 
 ---
+<img width="676" height="384" alt="Screenshot 2026-09-29 194427" src="https://github.com/user-attachments/assets/7e225ac5-6239-429b-af04-a25980f7a59e" />
 
 ## 🌟 Key Features
 
