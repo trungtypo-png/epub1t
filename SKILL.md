@@ -1,130 +1,142 @@
 ---
 name: ebook-pipeline
 description: >
-  Professional automated pipeline for converting, cleaning, fixing covers, and optimizing ebooks and documents
-  (PRC, MOBI, AZW, AZW3, DOCX, DOC, PDF scan & digital) to high-quality standard EPUBs using Calibre CLI,
-  PyMuPDF, and KCC Engine. Features automatic scan vs digital detection, real illustrated cover extraction,
-  ghost/blank page removal, Calibre multi-layer artifact pruning, and 1-bit/Retina bilevel compression.
+  Specialized automated pipeline for converting, cleaning, repairing covers, and optimizing digital documents
+  and scanned PDFs (PRC, MOBI, AZW, AZW3, DOCX, DOC, PDF) into high-quality standard EPUB 3 (Reflowable & Fixed-Layout)
+  using Calibre CLI, PyMuPDF, and KCC Engine. Features automatic scan vs digital classification, authentic illustrated
+  cover extraction, ghost/blank spacer page removal, Calibre multi-layer artifact pruning, and 1-bit high-resolution
+  monochrome bilevel compression.
 ---
 
-# Ebook Pipeline: Chuyển Đổi Sách, Khử Trang Trắng & Tối Ưu Hóa EPUB Chuẩn Quốc Tế
+# Ebook Pipeline: Document Conversion, Blank Page Cleaning & EPUB Optimization
 
-Pipeline chuyên sâu tự động hóa toàn bộ quy trình **chuyển đổi, dọn dẹp layer rác, loại bỏ trang trắng đệm, phục hồi ảnh bìa gốc thực tế và nén tối ưu dung lượng** cho mọi định dạng sách số và tài liệu scan sang `.epub` (EPUB 3 / Reflowable & Fixed-Layout).
+This skill specifies the comprehensive automation workflow and technical standards for **converting, de-duplicating ghost layers, removing blank spacer pages, restoring official illustrated covers, and compressing** text documents and scanned PDFs into standard `.epub` files.
 
 ---
 
-## 1. Yêu Cầu Phần Mềm & Cài Đặt (Prerequisites)
+## 1. Prerequisites & Software Installation
 
-Để pipeline hoạt động đầy đủ tính năng, cần chuẩn bị các công cụ sau:
-
-### 1.1. Calibre (Ebook Converter Engine)
-Dùng để chuyển đổi các định dạng văn bản (PRC, MOBI, AZW3, DOCX, EPUB...) và trích xuất cấu trúc reflowable.
-* **Download:** [Calibre Official Website](https://calibre-ebook.com/download) (hoặc bản Calibre Portable).
-* **Cấu hình PATH:** Đảm bảo `ebook-convert` có trong biến môi trường `PATH`, hoặc đặt biến môi trường `CALIBRE_PATH`:
-  * *Windows:* `C:\Program Files\Calibre2\ebook-convert.exe` hoặc `D:\Calibre Portable\Calibre\ebook-convert.exe`
+### 1.1. Calibre CLI (Reflowable & Digital Document Engine)
+Required when converting legacy reflowable text documents (`.prc`, `.mobi`, `.azw`, `.azw3`, `.docx`, `.doc`, `.fb2`).
+* **Download:** [Calibre Official Website](https://calibre-ebook.com/download) (or Calibre Portable).
+* **PATH Configuration:** Ensure `ebook-convert` is in your system `PATH` or set the `CALIBRE_PATH` environment variable:
+  * *Windows:* `C:\Program Files\Calibre2\ebook-convert.exe` or `D:\Calibre Portable\Calibre\ebook-convert.exe`
   * *macOS:* `/Applications/calibre.app/Contents/MacOS/ebook-convert`
   * *Linux:* `/usr/bin/ebook-convert`
 
-### 1.2. Kindle Comic Converter - KCC (Tùy chọn cho Sách tranh / Manga / Fixed-Layout)
+### 1.2. Kindle Comic Converter - KCC (Optional for Manga / Comics)
 * **Download:** [GitHub - ciromattia/kcc](https://github.com/ciromattia/kcc/releases)
-* Hỗ trợ chuẩn hóa ảnh scan, chia đôi trang đôi (spread splitting) và tối ưu độ phân giải cho thiết bị e-reader.
+* Used for spread splitting and panel optimization on e-reader devices.
 
-### 1.3. Môi trường Python & Thư viện phụ trợ
-Yêu cầu **Python 3.9+**. Cài đặt các thư viện xử lý ảnh và PDF:
+### 1.3. Python Environment & Dependencies
+Requires **Python 3.9+**. Install the core image & PDF processing libraries:
 
 ```bash
 pip install -r requirements.txt
 ```
-
-Hoặc cài trực tiếp:
-```bash
-pip install pymupdf Pillow
-```
-
-* `pymupdf` (FitZ): Render trang PDF vector/scan siêu tốc độ cao, trích xuất ảnh bìa chất lượng cao.
-* `Pillow` (PIL): Phân tích histogram, tính độ lệch chuẩn (stddev) để phát hiện trang trắng rác và chuyển đổi nén 1-bit Monochrome.
+* `pymupdf` (FitZ): Ultra-fast PDF page rasterization and metadata/cover extraction.
+* `Pillow` (PIL): Histogram standard deviation analysis for blank page detection and 1-bit monochrome bilevel conversion.
 
 ---
 
-## 2. Quy Trình Phân Loại & Xử Lý (Pipeline Architecture)
+## 2. Pipeline Architecture & Classification
 
 ```mermaid
 flowchart TD
-    A["File Sách Nguồn"] --> B{"Định Dạng & Đặc Tính"}
+    A["Source Document / PDF"] --> B{"Format & Characteristics"}
     
     B -->|"PRC / MOBI / AZW3 / DOCX / RTF"| C["Calibre Engine (ebook-convert)"]
-    C --> C1["Kiểm tra tính toàn vẹn (container.xml)"]
-    C1 --> C2["Tự động cập nhật bìa thực & Xóa file nguồn an toàn"]
+    C --> C1["Validate Integrity (META-INF/container.xml)"]
+    C1 --> C2["Auto Cover Fixer & Safe Source Deletion"]
     
-    B -->|"PDF Chữ Số (Text-based Reflowable)"| D["Calibre ebook-convert + Auto Cover Fixer"]
-    D --> D1["Xuất EPUB chữ chảy tùy biến font / cỡ chữ"]
-    D1 --> D2["Thay thế bìa vector 2 màu bằng bìa trang 1 thật"]
+    B -->|"Digital Text PDF (Reflowable)"| D["Calibre ebook-convert + Auto Cover Fixer"]
+    D --> D1["Extract Reflowable Typography & Fonts"]
+    D1 --> D2["Replace generic 2-tone cover with real Page 1 cover"]
     
-    B -->|"PDF Ảnh Scan (Scanned Documents)"| E["PyMuPDF / KCC Engine"]
-    E --> E1["Phân tích Histogram: Khử trang trắng lót/phân cách chương"]
-    E1 --> E2["Nén 1-bit Bilevel (Sách Đen Trắng) hoặc Retina Q80 JPEG"]
-    E2 --> E3["Đóng gói chuẩn EPUB 3 Fixed-Layout (SVG Responsive)"]
+    B -->|"Scanned Image PDF"| E["PyMuPDF / 1-Bit Bilevel Engine"]
+    E --> E1["Histogram Analysis: Purge blank spacer pages"]
+    E1 --> E2["Compress: 1-Bit Bilevel (B&W) or Retina Q80 JPEG"]
+    E2 --> E3["Package EPUB 3 Fixed-Layout (SVG Responsive)"]
     
-    C2 --> F["Hậu xử lý: clean_large_epubs (Dọn layer rác _2.jpg, _3.png & icon <3KB)"]
+    C2 --> F["Post-processing: clean_large_epubs (Prune _2.jpg, _3.png & icons <3KB)"]
     D2 --> F
     E3 --> F
-    F --> G["Hoàn thành: File EPUB chuẩn dung lượng siêu nhẹ (<30MB)"]
+    F --> G["Done: Ultra-lightweight compliant EPUB (<30MB)"]
 ```
 
 ---
 
-## 3. Các Tiêu Chuẩn Kỹ Thuật Cốt Lõi
+## 3. Core Technical Standards
 
-### 3.1. Phục hồi ảnh bìa minh họa chính thức (Official Illustrated Cover)
-* **Vấn đề:** Khi convert từ PDF/MOBI, Calibre thường tự sinh một file ảnh bìa 2 màu khối generic (`cover_image.jpg`), vô tình đẩy ảnh bìa minh họa thực tế vào trang 2 hoặc làm mất bìa trên trình đọc.
-* **Xử lý:** Script `fix_epub_covers.py` tự động quét trang đầu tiên của file gốc hoặc các file ảnh nội bộ (`index-1_1.jpg`, `cover.jpg`) để trích xuất bìa gốc sắc nét và ghi đè vào metadata `cover_image.jpg`.
+### 3.1. Official Illustrated Cover Restoration
+* **Problem:** When converting from PDF or MOBI, Calibre often creates a generic 2-tone SVG/JPEG cover (`cover_image.jpg`), pushing the real illustrated book cover into page 2.
+* **Resolution:** `fix_epub_covers.py` automatically inspects page 0 of the source file or internal image manifests (`index-1_1.jpg`, `cover.jpg`) to extract the authentic high-resolution cover and overwrite `cover_image.jpg`.
 
-### 3.2. Khử trang trắng rác & Layer phân mảnh (Blank & Multi-layer Artifact Cleanup)
-* **Vấn đề Calibre pdftohtml:** Chuyển đổi PDF có layer/vector thường tạo ra 3 ảnh/trang (`_1.jpg` nền, `_2.jpg` icon, `_3.png` overlay trong suốt) sinh ra hàng trăm trang trắng đệm xen kẽ và tăng gấp 5–10 lần dung lượng.
-* **Vấn đề Trang trắng scan:** Bản scan tài liệu thường có các trang trắng phân cách chương hoặc trang giấy lót.
-* **Giải pháp:** Phân tích độ lệch chuẩn & độ sáng trên dải xám (`mean >= 250` & `stddev <= 3.5` hoặc trang đen `mean <= 5` & `stddev <= 2`) để loại bỏ 100% trang trắng rác, đồng thời bóc tách sạch các thẻ `<img>` và manifest trong `content.opf`.
+### 3.2. Ghost Blank Page & Multi-layer Artifact Cleanup
+* **Calibre pdftohtml Artifacts:** Converting PDFs with complex layering splits each page into 3 fragmented files (`_1.jpg` base, `_2.jpg` icons, `_3.png` transparent overlay), creating hundreds of ghost blank pages and bloating file sizes by 500–1000%.
+* **Scanned Spacer Pages:** Older book scans often contain blank separator sheets and endpapers.
+* **Resolution:** Using grayscale histogram standard deviation thresholding (`mean >= 250` & `stddev <= 3.5` for white; `mean <= 5` & `stddev <= 2` for black), the pipeline discards 100% of blank pages and unlinks orphaned `<img>` tags from XHTML and OPF manifests.
 
-### 3.3. Khung hiển thị Responsive SVG Viewport (Fixed-Layout)
-Với sách scan, áp dụng chuẩn SVG Responsive Viewport cho toàn bộ các trang:
+### 3.3. Responsive SVG Viewport for Fixed-Layout EPUBs
+Every scanned page is rendered inside a responsive SVG container:
 ```html
 <svg width="100%" height="100%" viewBox="0 0 {width} {height}">
-    <image width="{width}" height="{height}" href="../Images/page_0001.jpg"/>
+    <image width="{width}" height="{height}" href="../Images/page_0001.png"/>
 </svg>
 ```
-Đảm bảo trang sách tự động co giãn vừa vặn 100% khung hình trên mọi thiết bị e-reader/tablet mà không bị viền đen thừa hay lệch tỉ lệ.
+Ensures 100% edge-to-edge scaling across all screen sizes and e-reader form factors without distortion or letterboxing.
 
-### 3.4. Chuẩn Nén 1-bit High-Res Monochrome cho PDF Scan Chữ
-* Đối với sách scan chữ và sơ đồ đen trắng, không lưu dạng JPEG 24-bit (dung lượng thường > 100MB).
-* **Quy chuẩn:**
-  1. **Bìa (Trang 1):** Giữ nguyên màu RGB chất lượng cao (JPEG Q85 hoặc WebP).
-  2. **Trang ruột:** Chuyển đổi sang **1-bit Monochrome Bilevel PNG** (`im.convert('1')`) ở độ phân giải gốc cao nhất (2000px – 3400px).
-  3. **Hiệu quả:** Mỗi trang chỉ tốn **30–70 KB**, cuốn sách 400 trang chỉ còn **~20–35 MB**, nét đanh từng nét chữ và lật trang siêu mượt.
-
----
-
-## 4. Hướng Dẫn Sử Dụng (Usage)
-
-### 4.1. Chuyển đổi tài liệu & PDF Scan qua CLI:
-```bash
-# Chuyển đổi toàn bộ tài liệu trong thư mục sang EPUB (1-bit monochrome cho PDF scan)
-python scripts/convert_books.py "/path/to/ebooks" --mode 1bit
-
-# Chuyển đổi và xóa file nguồn gốc nếu EPUB tạo thành công
-python scripts/convert_books.py "/path/to/ebooks" --delete-source
-```
-
-### 4.2. Quét & Dọn sạch Layer rác / Trang trắng toàn thư viện:
-```bash
-python scripts/clean_large_epubs.py "/path/to/ebooks"
-```
-
-### 4.3. Sửa bìa minh họa cho toàn bộ EPUB:
-```bash
-python scripts/fix_epub_covers.py "/path/to/ebooks"
-```
+### 3.4. 1-Bit High-Resolution Monochrome Bilevel Compression
+* For black-and-white scanned books, 24-bit RGB JPEG encoding causes massive file bloat (>100MB) and compression blur.
+* **Standard:**
+  1. **Cover (Page 1):** Preserves native RGB full color (JPEG Q85+ or WebP).
+  2. **Interior Pages:** Converted directly to **1-bit Monochrome Bilevel PNG** (`im.convert('1', dither=FLOYDSTEINBERG)`) at native resolution (2000px–3400px).
+  3. **Result:** Each page requires only **30–60 KB**, reducing a 400-page book to **~20–35 MB** with vector-sharp text readability.
 
 ---
 
-## 5. Nguyên Tắc An Toàn Dữ Liệu
-1. **Bảo toàn file gốc:** Luôn kiểm tra tính toàn vẹn của EPUB đích (`META-INF/container.xml` và dung lượng > 1KB) trước khi xóa file nguồn cũ.
-2. **Không ghi đè mù quáng:** Giữ nguyên các file `.epub` phát hành chính hãng (Retail EPUB) nếu chúng đã đạt chuẩn kỹ thuật.
+## 4. Execution Commands & Automation
+
+### 4.1. Batch Document & Scan Conversion
+```bash
+# Convert a folder with 1-bit scan optimization
+python scripts/convert_books.py "/path/to/books" --mode 1bit
+
+# Convert and safely delete source files upon success
+python scripts/convert_books.py "/path/to/books" --delete-source
+```
+
+### 4.2. Clean Multi-layer Artifacts & Blank Pages
+```bash
+python scripts/clean_large_epubs.py "/path/to/books"
+```
+
+### 4.3. Restore Official Illustrated Covers
+```bash
+python scripts/fix_epub_covers.py "/path/to/books"
+```
+
+---
+
+## 5. Data Safety & Integrity Rules
+
+1. **Retail Preservation:** Never overwrite verified official retail `.epub` files.
+2. **Safe Source Deletion:** Source files are only removed after the output EPUB passes structural validation (`META-INF/container.xml` present and file size > 1KB).
+
+---
+
+## ⚖️ DISCLAIMER / MIỄN TRỪ TRÁCH NHIỆM
+
+### ENGLISH
+This is an independent, non-commercial open-source project created by its author for personal and educational use. It is provided free of charge, **"AS IS"** and **"AS AVAILABLE"**, without any warranty or promise of support, maintenance, updates, compatibility, security, reliability, or fitness for a particular purpose.
+
+Using this software is completely voluntary and at your own risk. The process may fail, erase or corrupt data, or cause malfunctions. Before proceeding with batch conversions or source deletion options, ensure you have backed up your original files. You are solely responsible for data backups, file integrity, and the consequences of using this tool.
+
+The author and contributors disclaim all responsibility for loss or damage arising from downloading, installing, modifying, or using this software, including data loss, loss of use, or consequential damages.
+
+### TIẾNG VIỆT
+Đây là dự án mã nguồn mở độc lập, phi thương mại, được phát triển cho mục đích sử dụng cá nhân và nghiên cứu học tập. Bộ công cụ được cung cấp hoàn toàn miễn phí theo nguyên tắc **"NGUYÊN TRẠNG" (AS IS)** và **"HIỆN CÓ" (AS AVAILABLE)**, không đi kèm bất kỳ bảo hành hay cam kết nào về việc hỗ trợ, bảo trì, cập nhật, tính tương thích, độ tin cậy hay sự phù hợp cho một mục đích cụ thể.
+
+Việc cài đặt và sử dụng phần mềm là hoàn toàn tự nguyện và thuộc về trách nhiệm của chính bạn. Quá trình chuyển đổi có thể gặp lỗi hoặc làm thay đổi dữ liệu nếu chọn tính năng tự động xóa file nguồn. Hãy luôn sao lưu dữ liệu gốc của bạn trước khi thực hiện các tác vụ hàng loạt. Bạn hoàn toàn chịu trách nhiệm về dữ liệu, sao lưu và các hệ quả phát sinh từ việc sử dụng công cụ này.
+
+Tác giả và các cộng tác viên từ chối mọi trách nhiệm đối với bất kỳ mất mát hay thiệt hại nào phát sinh từ việc tải về, cài đặt, chỉnh sửa hoặc sử dụng công cụ, bao gồm cả mất mát dữ liệu hoặc các thiệt hại gián tiếp.
