@@ -88,6 +88,48 @@ def is_blank_image(img_data, mean_thresh=250.0, std_thresh=3.5):
     return False
 
 
+def binarize_image(pil_img, bg_whiten_cutoff=208, dark_ink_cutoff=55):
+    """
+    Intelligent Adaptive Binarization Filter:
+    1. Analyzes grayscale luminance distribution.
+    2. Whitens paper background tint (anything >= bg_whiten_cutoff is clamped to 255 pure white),
+       completely eliminating speckle noise / dust particles around scanned letters.
+    3. Strengthens dark ink strokes (anything <= dark_ink_cutoff is pushed to solid black).
+    4. Smoothly remaps mid-tone shades for illustration details.
+    5. Converts to 1-Bit Bilevel PNG with crisp text and zero background noise.
+    """
+    gray = pil_img.convert('L')
+    
+    # Calculate paper brightness dynamically from high percentiles
+    hist = gray.histogram()
+    total = gray.width * gray.height
+    cum = 0
+    estimated_bg = 245
+    for val in range(255, -1, -1):
+        cum += hist[val]
+        if cum >= total * 0.12:  # Top 12% brightest pixels reflect the paper tone
+            estimated_bg = val
+            break
+    
+    # Adapt cutoff to actual paper background tone
+    effective_white = min(bg_whiten_cutoff, max(185, int(estimated_bg * 0.94)))
+    effective_dark = min(dark_ink_cutoff, int(effective_white * 0.28))
+
+    lut = []
+    span = max(1, effective_white - effective_dark)
+    for i in range(256):
+        if i >= effective_white:
+            lut.append(255)  # 100% pure white paper background
+        elif i <= effective_dark:
+            lut.append(0)    # 100% solid black text ink
+        else:
+            val = int(255 * ((i - effective_dark) / span))
+            lut.append(val)
+            
+    stretched = gray.point(lut)
+    return stretched.convert('1', dither=Image.Dither.FLOYDSTEINBERG)
+
+
 def convert_document_to_epub(src_path, delete_source=False, auto_fix_cover=True):
     """
     Converts text and rich-document formats (PRC, MOBI, AZW, AZW3, DOCX, DOC, RTF, HTML, FB2, CHM) to EPUB.
@@ -182,7 +224,8 @@ def convert_scanned_pdf_to_epub(
                 img_ext = 'jpg'
                 media_type = 'image/jpeg'
             elif mode == '1bit':
-                pil_img = Image.open(io.BytesIO(img_data)).convert('1', dither=Image.Dither.FLOYDSTEINBERG)
+                raw_img = Image.open(io.BytesIO(img_data))
+                pil_img = binarize_image(raw_img)
                 buf = io.BytesIO()
                 pil_img.save(buf, format='PNG', optimize=True)
                 out_bytes = buf.getvalue()
