@@ -20,3 +20,7 @@ env/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Tessdata OCR models
+tessdata/
+*.traineddata

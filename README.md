@@ -53,6 +53,12 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 * 🚀 **4.5x Speed Boost:** Zero-copy direct memory buffer streaming from MuPDF into Pillow via `Image.frombytes()` and instant PNG encoding (converts a 300-page book in ~23 seconds).
 * 📊 **Real-Time Per-Page Progress UI:** Interactive progress bar and percentage label (`Page X/Total (Y%)`) on GUI.
 
+### v1.3.0 (Beta)
+* 📖 **Text Extraction & Reflowable EPUB Export:** Automatically extract full book content into clean UTF-8 `.txt` and pack into standard reflowable EPUB ebooks with original cover art.
+* ⚡ **Blazing Fast AVn/VNI Decoding (Regex Single-Pass):** Auto-detects and decodes legacy Vietnamese composite font diacritics in **<0.5s** for 288 pages.
+* 👁️ **Built-in PyMuPDF OCR Fallback:** Automatically falls back to optical character recognition for scan pages without a selectable digital text layer.
+* 🎛️ **4th GUI Mode:** Added `Reflowable Text & EPUB (Beta OCR)` mode directly in the interface.
+
 ---
 
 ## 📦 Prerequisites & Installation

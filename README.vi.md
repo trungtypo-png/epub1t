@@ -53,6 +53,12 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 * 🚀 **Tăng Tốc 4.5 Lần (Direct Buffer):** Truyền trực tiếp dữ liệu pixel từ bộ nhớ C của MuPDF vào Pillow qua `Image.frombytes()` và tối ưu hóa nén PNG tức thì (nén cả cuốn sách dày 300 trang chỉ mất ~23 giây).
 * 📊 **Tiến Độ Thời Gian Thực:** Bổ sung thanh tiến trình và nhãn phần trăm chi tiết (`Trang X/Tổng (Y%)`) trực quan trên giao diện GUI.
 
+### v1.3.0 (Beta)
+* 📖 **Trích Xuất Text & Xuất EPUB Chữ Số (Reflowable):** Bổ sung tính năng trích xuất toàn bộ sách sang file `.txt` Unicode sạch và đóng gói thành sách điện tử EPUB chữ số chuẩn dạng cuộn mượt (Reflowable) kèm ảnh bìa gốc.
+* ⚡ **Bộ Giải Mã AVn/VNI Siêu Tốc (Regex Single-Pass):** Tự động phát hiện và giải mã các font chữ cổ tiếng Việt (AVn, VNI, BK HCM) chỉ trong **0.4 giây** cho toàn bộ 288 trang sách.
+* 👁️ **Hỗ Trợ Tích Hợp PyMuPDF OCR:** Tự động fallback sang công nghệ nhận diện quang học OCR nếu trang PDF là bản scan thuần ảnh không có lớp chữ số.
+* 🎛️ **Chế Độ Thứ 4 Trên GUI:** Thêm lựa chọn `EPUB Chữ & Text (Beta OCR)` ngay trên giao diện ứng dụng.
+
 ---
 
 ## 📦 Cài Đặt & Sử Dụng

@@ -168,14 +168,22 @@ def convert_scanned_pdf_to_epub(
     progress_callback=None
 ):
     """
-    Converts scanned PDF books into high-performance Fixed-Layout EPUBs.
+    Converts scanned PDF books into high-performance Fixed-Layout EPUBs or Reflowable EPUBs.
     
     Modes:
     - '1bit' (Default): Preserves RGB cover on page 0, converts interior pages to 1-bit Bilevel Monochrome PNG.
       Produces ultra-sharp text and diagrams at minimal file sizes (30-60 KB per page).
     - 'grayscale': Converts interior pages to 8-bit Grayscale JPEG.
     - 'color': Keeps full RGB color JPEG (Q80-85).
+    - 'text': Beta OCR & AVn font decoding -> Reflowable pure text EPUB + clean TXT.
     """
+    if mode == 'text':
+        try:
+            from .extract_text import export_pdf_to_reflowable_epub
+        except ImportError:
+            from extract_text import export_pdf_to_reflowable_epub
+        return export_pdf_to_reflowable_epub(pdf_path, epub_path=epub_path, progress_callback=progress_callback)
+
     if epub_path is None:
         epub_path = os.path.splitext(pdf_path)[0] + '.epub'
     
@@ -380,7 +388,7 @@ def convert_digital_pdf_to_epub(pdf_path, auto_fix_cover=True):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: python convert_books.py <file-or-directory> [--mode 1bit|grayscale|color] [--delete-source]")
+        print("Usage: python convert_books.py <file-or-directory> [--mode 1bit|grayscale|color|text] [--delete-source]")
         sys.exit(1)
 
     target = sys.argv[1]

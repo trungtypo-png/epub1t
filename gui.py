@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub, get_calibre_path
 from scripts.clean_large_epubs import clean_epub_artifacts
 from scripts.fix_epub_covers import fix_epub_cover
+from scripts.extract_text import export_pdf_to_txt
 
 CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".epub1t_config.json")
 
@@ -23,10 +24,11 @@ TEXTS = {
         'btn_file': "Chọn File...",
         'btn_dir': "Chọn Thư Mục...",
         'opts_group': " ⚙️ Tùy Chọn Chuyển Đổi ",
-        'mode_label': "Chế độ PDF Scan:",
-        'mode_1bit': "1-Bit Monochrome (Siêu nét & nhẹ)",
+        'mode_label': "Chế độ PDF:",
+        'mode_1bit': "1-Bit Đơn sắc (Nhẹ & sắc nét)",
         'mode_color': "Màu gốc (Color)",
         'mode_gray': "Xám (Grayscale)",
+        'mode_text': "EPUB Chữ & Text (Beta OCR)",
         'chk_cover': "Tự động sửa ảnh bìa gốc (Cover Fix)",
         'chk_clean': "Khử trang trắng & layer rác",
         'chk_del': "Xóa file nguồn cũ sau khi xong",
@@ -50,6 +52,7 @@ TEXTS = {
         'log_clean': "   -> Dọn layer rác: {msg}",
         'log_cover': "   -> Đã sửa bìa ({desc})",
         'log_result': "   -> Kết quả: {status} ({res})",
+        'log_txt': "   -> Đã trích xuất Text: {txt_fn}",
         'log_del': "   -> Đã xóa file nguồn an toàn.",
         'log_done': "\n=== HOÀN TẤT TOÀN BỘ QUY TRÌNH ===",
         'status_ok': "Thành công",
@@ -64,10 +67,11 @@ TEXTS = {
         'btn_file': "Browse File...",
         'btn_dir': "Browse Folder...",
         'opts_group': " ⚙️ Conversion Options ",
-        'mode_label': "Scanned PDF Mode:",
+        'mode_label': "PDF Mode:",
         'mode_1bit': "1-Bit Monochrome (Sharp & Ultra Light)",
         'mode_color': "Original Color",
         'mode_gray': "Grayscale",
+        'mode_text': "Reflowable Text & EPUB (Beta OCR)",
         'chk_cover': "Auto Restore Real Cover",
         'chk_clean': "Clean Ghost Blank Pages & Artifacts",
         'chk_del': "Safely Delete Source Files",
@@ -190,7 +194,9 @@ class EbookConverterApp(tk.Tk):
         self.r2 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="color")
         self.r2.pack(side=tk.LEFT, padx=(0, 10))
         self.r3 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="grayscale")
-        self.r3.pack(side=tk.LEFT)
+        self.r3.pack(side=tk.LEFT, padx=(0, 10))
+        self.r4 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="text")
+        self.r4.pack(side=tk.LEFT)
 
         # Checkboxes
         chk_frame = ttk.Frame(self.opts_group)
@@ -278,6 +284,7 @@ class EbookConverterApp(tk.Tk):
         self.r1.config(text=t['mode_1bit'])
         self.r2.config(text=t['mode_color'])
         self.r3.config(text=t['mode_gray'])
+        self.r4.config(text=t['mode_text'])
 
         self.c1.config(text=t['chk_cover'])
         self.c2.config(text=t['chk_clean'])
@@ -376,6 +383,13 @@ class EbookConverterApp(tk.Tk):
                     ok, res = convert_scanned_pdf_to_epub(f, mode=mode, progress_callback=page_cb)
                     status_str = t['status_ok'] if ok else t['status_fail']
                     self.log(t['log_result'].format(status=status_str, res=res))
+                    if mode == 'text' and ok:
+                        try:
+                            ok_txt, txt_res = export_pdf_to_txt(f)
+                            if ok_txt:
+                                self.log(t['log_txt'].format(txt_fn=os.path.basename(txt_res)))
+                        except Exception:
+                            pass
                     if ok and del_src:
                         os.remove(f)
                         self.log(t['log_del'])
