@@ -6,13 +6,14 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.1.2-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.2.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
 ## 🌟 Tính Năng Nổi Bật
 
 - ⚡ **Chuẩn Nén 1-Bit Monochrome Bilevel:** Biến các cuốn sách scan chữ dung lượng nặng (>100MB) thành file EPUB Fixed-Layout siêu nhẹ (chỉ còn ~20–35MB) mà vẫn giữ độ sắc nét từng nét chữ ở độ phân giải cao (2000px - 3400px).
+- 🚀 **Tốc Độ Xử Lý Siêu Tốc (Direct Buffer):** Stream trực tiếp mảng pixel bộ nhớ không qua encode trung gian, nén cả cuốn sách dày 300 trang chỉ mất **dưới 25 giây** (nhanh hơn gấp 4.5 lần).
 - 🧹 **Bộ Lọc Binarization Thông Minh & Khử Noise:** Tự động nhận diện làm trắng tinh nền giấy scan ố vàng/xám, triệt tiêu 100% hạt bụi đen li ti quanh chữ và hình minh họa.
 - 🎨 **Tự Động Phục Hồi Bìa Sách Minh Họa Gốc:** Tự động trích xuất ảnh bìa chất lượng cao từ trang đầu tiên của file gốc và thay thế bìa tạm 2 màu mặc định của Calibre.
 - 🧹 **Khử Sạch Layer Rác & Trang Trắng Đệm:** Sử dụng thuật toán phân tích histogram độ lệch chuẩn (`mean >= 250`, `stddev <= 3.5`) để loại bỏ 100% trang trắng rác, đồng thời bóc tách sạch các layer phân mảnh `_2.jpg`, `_3.png` và icon `<3KB` do Calibre `pdftohtml` sinh ra.
@@ -36,8 +37,8 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 
 ### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
 Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/epub1t/releases)**:
-* **Windows:** Tải file `Epub1t-v1.1.2-Windows.zip` (giải nén và chạy `Epub1t.exe`).
-* **macOS:** Tải file `Epub1t-v1.1.2-macOS.zip` (giải nén và mở app).
+* **Windows:** Tải file `Epub1t-v1.2.0-Windows.zip` (giải nén và chạy `Epub1t.exe`).
+* **macOS:** Tải file `Epub1t-v1.2.0-macOS.zip` (giải nén và mở app).
 
 ### 2. Hoặc Chạy Trực Tiếp Bằng Python 3.9+
 ```bash
