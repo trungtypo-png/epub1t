@@ -21,6 +21,16 @@
 
 ---
 
+## 📊 Kết Quả Benchmark Thực Tế
+
+> Các file sách scan PDF >10MB được nén sang EPUB 1-Bit Monochrome:
+
+![Kết Quả Tối Ưu Thực Tế](./benchmark_results_en.png)
+
+Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ sách scan thử nghiệm thực tế — chữ nét đanh, không mờ nhòe.
+
+---
+
 ## 📦 Cài Đặt & Sử Dụng
 
 ### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
