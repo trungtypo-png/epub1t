@@ -46,7 +46,7 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 ## 📝 Changelog
 
 ### v1.1.3
-* 🎯 **Native High-Res Auto-Detection:** Automatically extracts embedded original scan images (`2332 x 3444` matching LEGO benchmark) without lossy downscaling.
+* 🎯 **Native High-Res Auto-Detection:** Automatically extracts embedded original scan images (`2332 x 3444` matching benchmark) without lossy downscaling.
 * 📱 **Full-Viewport Edge-to-Edge SVG:** Cleaned up SVG wrapper markup removing intermediate container margins for true 100% full-screen fit across e-readers.
 * 🧹 **Paper Whitening & Anti-Noise Filter:** Adaptive background tone elimination to remove speckle dust around letters.
 
@@ -60,11 +60,12 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 * 👁️ **Built-in PyMuPDF OCR Fallback:** Automatically falls back to optical character recognition for scan pages without a selectable digital text layer.
 * 🎛️ **4th GUI Mode:** Added `Reflowable EPUB (Beta)` mode directly in the interface.
 
-### v1.3.1
+### v1.3.1 (Beta)
 * 🛡️ **Auto-Polarity Guard:** Automatically detects negative/inverted polarity scans and PDF `ImageMask` with inverted decode arrays (`/Decode [1 0]`, mean luminance < 128), ensuring pure white paper backgrounds (`255`) and solid black text/drawings (`0`).
 * 📄 **Zero Dust & Speckle Noise:** Eliminates inverted black-background bugs entirely across massive multi-hundred page books while eliminating grayish background noise.
 * 📱 **Full-Bleed SVG Viewport:** Edge-to-edge adaptive viewport scaling without distortion or letterboxing across all e-reader apps.
 * 📊 **Record Compression Ratio:** Compresses full 765 high-resolution pages (`2122 x 3000px`) down to just **25.51 MB** (~33 KB/page).
+* 🎛️ **4th GUI Mode:** Added `Reflowable EPUB (Beta)` mode directly in the interface.
 
 ---
 
@@ -118,7 +119,7 @@ python scripts/fix_epub_covers.py "/path/to/books"
 
 Whether you are organizing a digital library or preparing books for e-readers, **epub1t** is engineered to solve these core challenges:
 
-* 📚 **Convert Scanned PDF to EPUB for E-Readers (Kindle, Kobo, Boox, iPad):**
+* 📚 **Convert Scanned PDF to EPUB for E-Readers (Xteink, Kindle, Kobo, Boox, iPad):**
   Raw scanned PDFs (>100MB) cause severe lagging, slow page turns, and memory crashes on e-readers. Epub1t converts scanned PDFs into lightweight Fixed-Layout EPUBs using 1-bit Monochrome Bilevel compression, slashing file sizes by ~80% down to 20–35MB while delivering razor-sharp text clarity at 3000px height.
 
 * 📖 **PDF OCR & Text Extraction to Reflowable EPUB:**

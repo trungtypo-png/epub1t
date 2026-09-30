@@ -46,7 +46,7 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 ## 📝 Nhật Ký Cập Nhật (Changelog)
 
 ### v1.1.3
-* 🎯 **Nhận Diện Độ Nét Gốc Native High-Res:** Tự động trích xuất ảnh scan gốc độ nét cao (`2332 x 3444` chuẩn benchmark bộ sách LEGO) mà không bị hạ độ phân giải.
+* 🎯 **Nhận Diện Độ Nét Gốc Native High-Res:** Tự động trích xuất ảnh scan gốc độ nét cao (`2332 x 3444` chuẩn benchmark) mà không bị hạ độ phân giải.
 * 📱 **Khung SVG Full-Viewport Edge-to-Edge:** Loại bỏ các thẻ wrapper trung gian, khớp 100% toàn màn hình trên máy đọc sách (Kindle, Kobo, iPad).
 * 🧹 **Bộ Lọc Làm Trắng Nền & Khử Noise:** Triệt tiêu hoàn toàn các hạt bụi đen (noise) lấm tấm quanh viền chữ và tranh.
 
@@ -60,11 +60,12 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 * 👁️ **Hỗ Trợ Tích Hợp PyMuPDF OCR:** Tự động fallback sang công nghệ nhận diện quang học OCR nếu trang PDF là bản scan thuần ảnh không có lớp chữ số.
 * 🎛️ **Chế Độ Thứ 4 Trên GUI:** Thêm lựa chọn `EPUB Chữ (Beta)` ngay trên giao diện ứng dụng.
 
-### v1.3.1
+### v1.3.1 (Beta)
 * 🛡️ **Bộ Lọc Tự Động Nhận Diện Cực Tính (Auto-Polarity Guard):** Tự động phát hiện các trang scan âm bản hoặc PDF `ImageMask` có bảng giải mã nghịch đảo (`/Decode [1 0]`, độ sáng trung bình `< 128`) để đảo cực chuẩn xác.
 * 📄 **Nền Trắng Tinh Khiết & Chữ Đen Nhánh:** Toàn bộ các trang sách ruột (ngay cả các bộ sách dày >700 trang) luôn hiển thị nền trắng `255`, nét chữ và tranh vẽ đen nhánh `0`, loại bỏ 100% tình trạng âm bản (nền đen xì, chữ trắng lóa) và khử sạch hạt bụi/noise xám mốc.
 * 📱 **Khung Hiển Thị Full-Bleed SVG Viewport:** Giữ nguyên bìa gốc, trang ruột full-bleed SVG viewport tự co giãn vừa khít màn hình mọi app đọc sách.
 * 📊 **Dung Lượng Siêu Nhẹ:** Toàn bộ 765 trang siêu nét (`2122 x 3000px`) được nén gọn chỉ còn **25.51 MB** (~33 KB/trang).
+* 🎛️ **Chế Độ Thứ 4 Trên GUI:** Thêm lựa chọn `EPUB Chữ (Beta)` ngay trên giao diện ứng dụng.
 
 ---
 
@@ -118,7 +119,7 @@ python scripts/fix_epub_covers.py "/duong/dan/thu/muc/sach"
 
 Nếu bạn đang tìm kiếm giải pháp tối ưu cho kho sách điện tử của mình, **epub1t** giải quyết trọn vẹn các bài toán thường gặp:
 
-* 📚 **Chuyển đổi PDF sang EPUB cho máy đọc sách (Kindle, Kobo, Boox, iPad):**
+* 📚 **Chuyển đổi PDF sang EPUB cho máy đọc sách (Xteink, Kindle, Kobo, Boox, iPad):**
   Các file PDF scan thường có dung lượng rất nặng (>100MB), gây giật lag hoặc tràn RAM trên máy đọc sách. Epub1t tối ưu hóa và chuyển đổi sách PDF scan sang EPUB Fixed-Layout với chuẩn nén 1-bit Monochrome Bilevel, giảm đến 80% dung lượng (chỉ còn ~20–35MB) mà từng nét chữ và biểu đồ vẫn sắc nét như in ở độ phân giải cao.
 
 * 📖 **Trích xuất Text & OCR PDF tiếng Việt sang EPUB Chữ Số (Reflowable):**
