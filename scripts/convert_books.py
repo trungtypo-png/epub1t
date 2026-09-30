@@ -207,24 +207,50 @@ def convert_scanned_pdf_to_epub(
         skipped_blanks = 0
 
         for i, page in enumerate(doc):
-            pix = page.get_pixmap(matrix=mat, alpha=False)
-            img_data = pix.tobytes(output='png')
+            rect = page.rect
+            page_h = max(1.0, rect.height)
+            
+            # Target ~2800 - 3200px height for ultra-sharp vector-like text matching LEGO benchmark
+            scale = max(2.5, min(4.8, 3000.0 / page_h))
+            mat = pymupdf.Matrix(scale, scale)
+            
+            # Check if page has single native high-res image
+            imgs = page.get_images()
+            raw_img = None
+            if len(imgs) == 1:
+                try:
+                    xref = imgs[0][0]
+                    base_info = doc.extract_image(xref)
+                    # If embedded image is already high resolution (>= 1600px height)
+                    if base_info['height'] >= 1600:
+                        raw_img = Image.open(io.BytesIO(base_info['image']))
+                except Exception:
+                    raw_img = None
 
-            # Skip blank divider pages (preserve page 0 / cover)
-            if i > 0 and skip_blank_pages and is_blank_image(img_data):
-                skipped_blanks += 1
-                continue
+            if raw_img is None:
+                pix = page.get_pixmap(matrix=mat, alpha=False)
+                raw_img = Image.open(io.BytesIO(pix.tobytes(output='png')))
+
+            # Check blank divider pages (preserve page 0 / cover)
+            if i > 0 and skip_blank_pages:
+                buf_check = io.BytesIO()
+                raw_img.save(buf_check, format='PNG')
+                if is_blank_image(buf_check.getvalue()):
+                    skipped_blanks += 1
+                    continue
 
             valid_idx += 1
-            w, h = pix.width, pix.height
+            w, h = raw_img.size
 
             # Page 0 is always preserved as high-res RGB color
             if i == 0 or mode == 'color':
-                out_bytes = pix.tobytes(output='jpg', jpg_quality=max(85, jpeg_quality))
+                rgb_img = raw_img.convert('RGB')
+                buf = io.BytesIO()
+                rgb_img.save(buf, format='JPEG', quality=max(85, jpeg_quality))
+                out_bytes = buf.getvalue()
                 img_ext = 'jpg'
                 media_type = 'image/jpeg'
             elif mode == '1bit':
-                raw_img = Image.open(io.BytesIO(img_data))
                 pil_img = binarize_image(raw_img)
                 buf = io.BytesIO()
                 pil_img.save(buf, format='PNG', optimize=True)
@@ -232,14 +258,17 @@ def convert_scanned_pdf_to_epub(
                 img_ext = 'png'
                 media_type = 'image/png'
             elif mode == 'grayscale':
-                pil_img = Image.open(io.BytesIO(img_data)).convert('L')
+                pil_img = raw_img.convert('L')
                 buf = io.BytesIO()
                 pil_img.save(buf, format='JPEG', quality=jpeg_quality)
                 out_bytes = buf.getvalue()
                 img_ext = 'jpg'
                 media_type = 'image/jpeg'
             else:
-                out_bytes = pix.tobytes(output='jpg', jpg_quality=jpeg_quality)
+                rgb_img = raw_img.convert('RGB')
+                buf = io.BytesIO()
+                rgb_img.save(buf, format='JPEG', quality=jpeg_quality)
+                out_bytes = buf.getvalue()
                 img_ext = 'jpg'
                 media_type = 'image/jpeg'
 
@@ -249,7 +278,7 @@ def convert_scanned_pdf_to_epub(
             page_id = f'page_{valid_idx:04d}'
             xhtml_filename = f'page_{valid_idx:04d}.xhtml'
             
-            # Responsive SVG Viewport markup
+            # Clean Full-Viewport SVG (Exact Match to LEGO Benchmark)
             xhtml_content = f'''<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
@@ -258,18 +287,15 @@ def convert_scanned_pdf_to_epub(
     <meta name="viewport" content="width={w}, height={h}"/>
     <style type="text/css">
         @page {{ margin: 0; padding: 0; }}
-        body {{ margin: 0; padding: 0; background-color: #FFFFFF; text-align: center; }}
-        div.img-wrapper {{ width: 100vw; height: 100vh; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; }}
-        svg {{ width: 100%; height: 100%; }}
+        html, body {{ margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #FFFFFF; }}
+        svg {{ width: 100%; height: 100%; margin: 0; padding: 0; display: block; }}
     </style>
 </head>
 <body>
-    <div class="img-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"
-             width="100%" height="100%" viewBox="0 0 {w} {h}">
-            <image width="{w}" height="{h}" xlink:href="../Images/{img_filename}"/>
-        </svg>
-    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"
+         width="100%" height="100%" viewBox="0 0 {w} {h}">
+        <image width="{w}" height="{h}" xlink:href="../Images/{img_filename}"/>
+    </svg>
 </body>
 </html>'''
             zf.writestr(f'OEBPS/Text/{xhtml_filename}', xhtml_content)
