@@ -25,11 +25,33 @@
 
 ## 📊 Kết Quả Benchmark Thực Tế
 
+### 1. Chuẩn Nén 1-Bit Monochrome Bilevel (Sách PDF Scan)
 > Các file sách scan PDF >10MB được nén sang EPUB 1-Bit Monochrome:
 
 ![Kết Quả Tối Ưu Thực Tế](./benchmark_results_en.png)
 
 Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ sách scan thử nghiệm thực tế — chữ nét đanh, không mờ nhòe.
+
+### 2. Giải Mã Font Chữ Cổ AVn / VNI-Times (PDF Tiếng Việt Trước 2005)
+> Xử lý triệt để lỗi vỡ dấu tiếng Việt nghiêm trọng (`vaâo → vào`, `khoaû → khỏa`, `thûuâng → thường`):
+
+![So Sánh Giải Mã Font AVn](./avn_font_benchmark.png)
+
+* **Trước khi giải mã (Bên phải):** Chữ bị phân mảnh thành các ký tự rác PostScript do font AVn 1-byte/2-byte cũ không tương thích Unicode.
+* **Sau khi giải mã (Bên trái):** Xuất bản thành file EPUB reflowable chuẩn Unicode UTF-8 đọc mượt mà, chữ đẹp chuẩn in, dung lượng dưới 1MB.
+
+---
+
+## 📝 Nhật Ký Cập Nhật (Changelog)
+
+### v1.1.3
+* 🎯 **Nhận Diện Độ Nét Gốc Native High-Res:** Tự động trích xuất ảnh scan gốc độ nét cao (`2332 x 3444` chuẩn benchmark bộ sách LEGO) mà không bị hạ độ phân giải.
+* 📱 **Khung SVG Full-Viewport Edge-to-Edge:** Loại bỏ các thẻ wrapper trung gian, khớp 100% toàn màn hình trên máy đọc sách (Kindle, Kobo, iPad).
+* 🧹 **Bộ Lọc Làm Trắng Nền & Khử Noise:** Triệt tiêu hoàn toàn các hạt bụi đen (noise) lấm tấm quanh viền chữ và tranh.
+
+### v1.2.0
+* 🚀 **Tăng Tốc 4.5 Lần (Direct Buffer):** Truyền trực tiếp dữ liệu pixel từ bộ nhớ C của MuPDF vào Pillow qua `Image.frombytes()` và tối ưu hóa nén PNG tức thì (nén cả cuốn sách dày 300 trang chỉ mất ~23 giây).
+* 📊 **Tiến Độ Thời Gian Thực:** Bổ sung thanh tiến trình và nhãn phần trăm chi tiết (`Trang X/Tổng (Y%)`) trực quan trên giao diện GUI.
 
 ---
 

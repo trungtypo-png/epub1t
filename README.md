@@ -25,11 +25,33 @@
 
 ## 📊 Real-World Benchmark Results
 
+### 1. 1-Bit Monochrome Bilevel Compression (PDF Scan)
 > Files > 10MB converted from scanned PDF to 1-Bit Monochrome EPUB:
 
 ![Real-World Optimization Benchmark](./benchmark_results_en.png)
 
 Average size reduction: **~80%** across 12 real scanned book collections — without any visible loss in text sharpness.
+
+### 2. AVn / VNI-Times Legacy Font Decoding (Pre-2005 Vietnamese PDFs)
+> Resolving severely corrupted diacritics (`vaâo → vào`, `khoaû → khỏa`, `thûuâng → thường`):
+
+![AVn Legacy Font Decoding Comparison](./avn_font_benchmark.png)
+
+* **Before (Right):** Severely broken PostScript composite characters from legacy 1-byte/2-byte AVn fonts.
+* **After (Left):** Perfectly decoded standard Unicode UTF-8 EPUB with vector-sharp clarity and reflowable text under 1MB.
+
+---
+
+## 📝 Changelog
+
+### v1.1.3
+* 🎯 **Native High-Res Auto-Detection:** Automatically extracts embedded original scan images (`2332 x 3444` matching LEGO benchmark) without lossy downscaling.
+* 📱 **Full-Viewport Edge-to-Edge SVG:** Cleaned up SVG wrapper markup removing intermediate container margins for true 100% full-screen fit across e-readers.
+* 🧹 **Paper Whitening & Anti-Noise Filter:** Adaptive background tone elimination to remove speckle dust around letters.
+
+### v1.2.0
+* 🚀 **4.5x Speed Boost:** Zero-copy direct memory buffer streaming from MuPDF into Pillow via `Image.frombytes()` and instant PNG encoding (converts a 300-page book in ~23 seconds).
+* 📊 **Real-Time Per-Page Progress UI:** Interactive progress bar and percentage label (`Page X/Total (Y%)`) on GUI.
 
 ---
 
