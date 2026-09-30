@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
+[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
 
 ---
 
@@ -17,6 +17,16 @@
 - 🧹 **Artifact & Ghost Page Cleaner:** Detects blank spacer pages using histogram standard deviation analysis (`mean >= 250`, `stddev <= 3.5`) and strips away fragmented Calibre `pdftohtml` multi-layer images (`_2.jpg`, `_3.png`, sub-3KB noise).
 - 📱 **Responsive SVG Viewport:** Implements `<svg viewBox="0 0 w h">` wrappers so fixed-layout pages perfectly adapt to any e-reader/tablet resolution without letterboxing.
 - 🛡️ **Safe Source Deletion:** Validates EPUB structural integrity (`META-INF/container.xml` verification) before removing source files.
+
+---
+
+## 📊 Real-World Benchmark Results
+
+> Files > 10MB converted from scanned PDF to 1-Bit Monochrome EPUB:
+
+![Real-World Optimization Benchmark](./benchmark_results_en.png)
+
+Average size reduction: **~80%** across 12 real scanned book collections — without any visible loss in text sharpness.
 
 ---
 

@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
+[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
 
 ---
 

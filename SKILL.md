@@ -93,6 +93,10 @@ Ensures 100% edge-to-edge scaling across all screen sizes and e-reader form fact
   2. **Interior Pages:** Converted directly to **1-bit Monochrome Bilevel PNG** (`im.convert('1', dither=FLOYDSTEINBERG)`) at native resolution (2000px–3400px).
   3. **Result:** Each page requires only **30–60 KB**, reducing a 400-page book to **~20–35 MB** with vector-sharp text readability.
 
+### 3.5. Legacy Vietnamese Font Decoding (AVn / VNI-Times / Composite PostScript)
+* **Problem:** Vietnamese PDF books published before 2005 (e.g., First News, NXB Trẻ) commonly use 1-byte/2-byte proprietary font encodings (`AVnTechno`, `AVnGiovanni`). Standard text extraction tools produce severely broken diacritics such as `vaâo chuaáng voà khaã nùng àuåt cûuåc` — rendering the extracted text completely unreadable.
+* **Resolution:** A composite diacritic token analyzer maps base vowels (`a`, `ù`, `ê`, `ï`, `ö`, `ú`, `û`, `à`) and tone marks (`á`, `â`, `ã`, `ä`, `å`) to produce accurate **Unicode UTF-8** output, ensuring clean readable EPUBs well under 1MB.
+
 ---
 
 ## 4. Execution Commands & Automation
