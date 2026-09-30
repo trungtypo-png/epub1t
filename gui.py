@@ -219,8 +219,11 @@ class EbookConverterApp(tk.Tk):
         self.btn_run = ttk.Button(run_frame, text="", command=self._start_processing)
         self.btn_run.pack(fill=tk.X, ipady=5)
 
-        self.progress = ttk.Progressbar(run_frame, mode='indeterminate')
+        self.progress = ttk.Progressbar(run_frame, mode='determinate')
         self.progress.pack(fill=tk.X, pady=(4, 0))
+
+        self.progress_lbl = ttk.Label(run_frame, text="", font=("Segoe UI", 8), foreground="#555555")
+        self.progress_lbl.pack(anchor=tk.W, pady=(2, 0))
 
         # Log Text Box
         self.log_group = ttk.LabelFrame(content, text="", padding="5")
@@ -322,7 +325,8 @@ class EbookConverterApp(tk.Tk):
 
         self.is_processing = True
         self.btn_run.config(state=tk.DISABLED, text=t['btn_running'])
-        self.progress.start(10)
+        self.progress['value'] = 0
+        self.progress_lbl.config(text="")
         self.log_text.delete(1.0, tk.END)
         self.log(t['log_start'].format(path=target))
 
@@ -363,7 +367,13 @@ class EbookConverterApp(tk.Tk):
                         if ok:
                             self.log(t['log_cover'].format(desc=desc))
                 elif ext == '.pdf':
-                    ok, res = convert_scanned_pdf_to_epub(f, mode=mode)
+                    def page_cb(cur, total):
+                        pct = int(cur / total * 100) if total else 0
+                        self.progress['value'] = pct
+                        self.progress_lbl.config(text=f"Trang {cur}/{total} ({pct}%)" if self.lang == 'vi' else f"Page {cur}/{total} ({pct}%)")
+                        self.update_idletasks()
+
+                    ok, res = convert_scanned_pdf_to_epub(f, mode=mode, progress_callback=page_cb)
                     status_str = t['status_ok'] if ok else t['status_fail']
                     self.log(t['log_result'].format(status=status_str, res=res))
                     if ok and del_src:

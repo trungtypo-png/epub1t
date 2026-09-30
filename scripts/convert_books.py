@@ -71,11 +71,14 @@ def is_valid_epub(epub_path):
         return False
 
 
-def is_blank_image(img_data, mean_thresh=250.0, std_thresh=3.5):
+def is_blank_image(img_or_data, mean_thresh=250.0, std_thresh=3.5):
     """Detects whether an image is a blank white or black spacer/divider page."""
     try:
-        im = Image.open(io.BytesIO(img_data))
-        gray = im.convert('L')
+        if isinstance(img_or_data, Image.Image):
+            gray = img_or_data.convert('L') if img_or_data.mode != 'L' else img_or_data
+        else:
+            im = Image.open(io.BytesIO(img_or_data))
+            gray = im.convert('L')
         stat = ImageStat.Stat(gray)
         mean = stat.mean[0]
         stddev = stat.stddev[0]
@@ -161,7 +164,8 @@ def convert_scanned_pdf_to_epub(
     dpi_scale=1.5,
     mode='1bit',
     jpeg_quality=82,
-    skip_blank_pages=True
+    skip_blank_pages=True,
+    progress_callback=None
 ):
     """
     Converts scanned PDF books into high-performance Fixed-Layout EPUBs.
@@ -207,6 +211,12 @@ def convert_scanned_pdf_to_epub(
         skipped_blanks = 0
 
         for i, page in enumerate(doc):
+            if progress_callback:
+                try:
+                    progress_callback(i + 1, total_pages)
+                except Exception:
+                    pass
+
             rect = page.rect
             page_h = max(1.0, rect.height)
             
@@ -229,13 +239,11 @@ def convert_scanned_pdf_to_epub(
 
             if raw_img is None:
                 pix = page.get_pixmap(matrix=mat, alpha=False)
-                raw_img = Image.open(io.BytesIO(pix.tobytes(output='png')))
+                raw_img = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
 
             # Check blank divider pages (preserve page 0 / cover)
             if i > 0 and skip_blank_pages:
-                buf_check = io.BytesIO()
-                raw_img.save(buf_check, format='PNG')
-                if is_blank_image(buf_check.getvalue()):
+                if is_blank_image(raw_img):
                     skipped_blanks += 1
                     continue
 
@@ -253,7 +261,7 @@ def convert_scanned_pdf_to_epub(
             elif mode == '1bit':
                 pil_img = binarize_image(raw_img)
                 buf = io.BytesIO()
-                pil_img.save(buf, format='PNG', optimize=True)
+                pil_img.save(buf, format='PNG', optimize=False)
                 out_bytes = buf.getvalue()
                 img_ext = 'png'
                 media_type = 'image/png'
