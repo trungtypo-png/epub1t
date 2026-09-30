@@ -34,8 +34,8 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 
 ### 1. Download Standalone App (No Python required)
 Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)** page:
-* **Windows:** Download `Ebook1BitOptimizer-Windows.zip` (extract and run `Ebook1BitOptimizer.exe`).
-* **macOS:** Download `Ebook1BitOptimizer-macOS.tar.gz`.
+* **Windows:** Download `Ebook1BitOptimizer-v1.1.0-Windows.zip` (extract and run `Ebook1BitOptimizer.exe`).
+* **macOS:** Download `Ebook1BitOptimizer-v1.1.0-macOS.zip` (extract and open the app bundle).
 
 ### 2. Or Run from Source (Python 3.9+)
 ```bash
