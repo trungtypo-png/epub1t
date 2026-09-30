@@ -102,8 +102,8 @@ TEXTS = {
 class EbookConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("680x640")
-        self.minsize(620, 520)
+        self.geometry("680x700")
+        self.minsize(620, 580)
 
         # Variables
         self.lang = "vi"
@@ -212,6 +212,16 @@ class EbookConverterApp(tk.Tk):
         self.btn_calibre = ttk.Button(self.calibre_group, text="", command=self._browse_calibre)
         self.btn_calibre.pack(side=tk.RIGHT)
 
+        # Action Button & Progress Bar — placed ABOVE log so always visible
+        run_frame = ttk.Frame(content)
+        run_frame.pack(fill=tk.X, pady=(0, 6))
+
+        self.btn_run = ttk.Button(run_frame, text="", command=self._start_processing)
+        self.btn_run.pack(fill=tk.X, ipady=5)
+
+        self.progress = ttk.Progressbar(run_frame, mode='indeterminate')
+        self.progress.pack(fill=tk.X, pady=(4, 0))
+
         # Log Text Box
         self.log_group = ttk.LabelFrame(content, text="", padding="5")
         self.log_group.pack(fill=tk.BOTH, expand=True, pady=(0, 8))
@@ -222,15 +232,6 @@ class EbookConverterApp(tk.Tk):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Action Buttons & Progress Bar
-        bottom_frame = ttk.Frame(self, padding="15 0 15 15")
-        bottom_frame.pack(fill=tk.X)
-
-        self.progress = ttk.Progressbar(bottom_frame, mode='indeterminate')
-        self.progress.pack(fill=tk.X, pady=(0, 8))
-
-        self.btn_run = ttk.Button(bottom_frame, text="", command=self._start_processing)
-        self.btn_run.pack(fill=tk.X, ipady=4)
 
     def _on_lang_changed(self, event=None):
         selected = self.lang_combo.get()
