@@ -107,9 +107,24 @@ python scripts/fix_epub_covers.py "/path/to/books"
 
 ---
 
-## 🏷️ Keywords & Search Tags
+## 💡 Common Use Cases & Problem Solving
 
-`pdf to epub`, `pdf to epub converter`, `convert pdf to epub`, `scanned pdf to epub`, `pdf ocr to epub`, `ebook converter`, `prc to epub`, `mobi to epub`, `azw3 to epub`, `docx to epub`, `1-bit monochrome epub`, `kindle epub converter`, `kobo epub optimizer`, `extract text from pdf`, `avn font decoder`, `vietnamese ocr`, `pdf2epub`, `fixed-layout epub`, `reflowable epub`
+Whether you are organizing a digital library or preparing books for e-readers, **epub1t** is engineered to solve these core challenges:
+
+* 📚 **Convert Scanned PDF to EPUB for E-Readers (Kindle, Kobo, Boox, iPad):**
+  Raw scanned PDFs (>100MB) cause severe lagging, slow page turns, and memory crashes on e-readers. Epub1t converts scanned PDFs into lightweight Fixed-Layout EPUBs using 1-bit Monochrome Bilevel compression, slashing file sizes by ~80% down to 20–35MB while delivering razor-sharp text clarity at 3000px height.
+
+* 📖 **PDF OCR & Text Extraction to Reflowable EPUB:**
+  Easily transform image-only PDF scans and digital documents into reflowable text EPUBs and clean `.txt` files. Integrated with PyMuPDF OCR to enable resizable fonts, dark mode themes, text searching, and instant dictionary lookups.
+
+* 🔡 **Fix Broken Vietnamese Diacritics (AVn, VNI, TCVN3 Font Decoder):**
+  Directly converts and recovers garbled text from pre-2005 Vietnamese PDF books (`vaâo → vào`, `thûuâng → thường`) into clean Unicode UTF-8 text in less than 0.5 seconds.
+
+* 🔄 **Batch Ebook Format Conversion (PRC, MOBI, AZW, AZW3, DOCX to EPUB):**
+  Streamlines your entire digital book catalog into modern EPUB 3 files with structural validation (`META-INF/container.xml`) and optional safe deletion of obsolete source files.
+
+* 🎨 **Restore Real Illustrated Book Covers & Purge Blank Pages:**
+  Eliminates Calibre's generic two-tone placeholder covers by extracting authentic high-resolution covers from page 0, while stripping out ghost blank pages and fragmented image layers.
 
 ---
 

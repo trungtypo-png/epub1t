@@ -107,9 +107,24 @@ python scripts/fix_epub_covers.py "/duong/dan/thu/muc/sach"
 
 ---
 
-## 🏷️ Từ Khóa Tìm Kiếm (Keywords)
+## 💡 Các Trường Hợp Sử Dụng Điển Hình (Use Cases & Solutions)
 
-`chuyển pdf sang epub`, `convert pdf sang epub`, `pdf to epub`, `pdf to epub converter`, `chuyển sách scan sang epub`, `tối ưu hóa epub`, `giải mã font avn`, `phục hồi bìa sách`, `khử trang trắng pdf`, `nén sách 1-bit`, `chuyển prc sang epub`, `chuyển mobi sang epub`, `chuyển azw3 sang epub`, `ocr pdf tiếng việt`, `trích xuất text từ pdf`, `phần mềm làm sách điện tử`, `scanned pdf to epub`, `fixed-layout epub`, `reflowable epub`
+Nếu bạn đang tìm kiếm giải pháp tối ưu cho kho sách điện tử của mình, **epub1t** giải quyết trọn vẹn các bài toán thường gặp:
+
+* 📚 **Chuyển đổi PDF sang EPUB cho máy đọc sách (Kindle, Kobo, Boox, iPad):**
+  Các file PDF scan thường có dung lượng rất nặng (>100MB), gây giật lag hoặc tràn RAM trên máy đọc sách. Epub1t tối ưu hóa và chuyển đổi sách PDF scan sang EPUB Fixed-Layout với chuẩn nén 1-bit Monochrome Bilevel, giảm đến 80% dung lượng (chỉ còn ~20–35MB) mà từng nét chữ và biểu đồ vẫn sắc nét như in ở độ phân giải cao.
+
+* 📖 **Trích xuất Text & OCR PDF tiếng Việt sang EPUB Chữ Số (Reflowable):**
+  Chuyển đổi tài liệu scan ảnh hoặc file PDF số sang sách điện tử dạng cuộn chữ mượt mà. Tích hợp engine PyMuPDF OCR tiếng Việt tự động quét ảnh thành văn bản, cho phép bạn tùy chỉnh kích thước font chữ, đổi nền sáng/tối và tra từ điển dễ dàng.
+
+* 🔡 **Khắc phục lỗi font chữ cổ tiếng Việt (AVn / VNI / TCVN3 / BK HCM):**
+  Sửa triệt để tình trạng vỡ dấu tiếng Việt nghiêm trọng (`vaâo → vào`, `thûuâng → thường`) khi convert các file PDF sách cũ xuất bản trước năm 2005 sang Unicode UTF-8 chuẩn chỉ trong **0.4 giây** cho toàn bộ cuốn sách.
+
+* 🔄 **Chuyển đổi định dạng sách chữ hàng loạt (PRC, MOBI, AZW, AZW3, DOCX sang EPUB):**
+  Tự động quét và chuẩn hóa toàn bộ thư viện sách chữ về định dạng chuẩn EPUB 3 chất lượng cao, đồng thời tự động xóa an toàn file nguồn cũ sau khi đã xác thực file EPUB hoàn chỉnh.
+
+* 🎨 **Phục hồi bìa sách minh họa gốc & Khử trang trắng rác:**
+  Khắc phục hoàn toàn tình trạng Calibre tự vẽ bìa tạm 2 màu làm mất ảnh bìa thật của sách. Tự động bóc tách bìa chất lượng cao từ trang đầu và khử sạch 100% trang trắng đệm hay layer rác phát sinh.
 
 ---
 
