@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.1-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -14,6 +14,7 @@
 
 - ⚡ **Chuẩn Nén 1-Bit Monochrome Bilevel:** Biến các cuốn sách scan chữ dung lượng nặng (>100MB) thành file EPUB Fixed-Layout siêu nhẹ (chỉ còn ~20–35MB) mà vẫn giữ độ sắc nét từng nét chữ ở độ phân giải cao (2000px - 3400px).
 - 🚀 **Tốc Độ Xử Lý Siêu Tốc (Direct Buffer):** Stream trực tiếp mảng pixel bộ nhớ không qua encode trung gian, nén cả cuốn sách dày 300 trang chỉ mất **dưới 25 giây** (nhanh hơn gấp 4.5 lần).
+- 🛡️ **Bộ Lọc Nhận Diện Cực Tính Tự Động (Auto-Polarity Guard):** Tự động phát hiện các trang scan âm bản hoặc đối tượng PDF `ImageMask` có bảng giải mã nghịch đảo (`/Decode [1 0]`) để đảo cực chuẩn: nền trắng tinh khiết (`255`), chữ đen nhánh (`0`).
 - 🧹 **Bộ Lọc Binarization Thông Minh & Khử Noise:** Tự động nhận diện làm trắng tinh nền giấy scan ố vàng/xám, triệt tiêu 100% hạt bụi đen li ti quanh chữ và hình minh họa.
 - 🎨 **Tự Động Phục Hồi Bìa Sách Minh Họa Gốc:** Tự động trích xuất ảnh bìa chất lượng cao từ trang đầu tiên của file gốc và thay thế bìa tạm 2 màu mặc định của Calibre.
 - 🧹 **Khử Sạch Layer Rác & Trang Trắng Đệm:** Sử dụng thuật toán phân tích histogram độ lệch chuẩn (`mean >= 250`, `stddev <= 3.5`) để loại bỏ 100% trang trắng rác, đồng thời bóc tách sạch các layer phân mảnh `_2.jpg`, `_3.png` và icon `<3KB` do Calibre `pdftohtml` sinh ra.
@@ -57,7 +58,13 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 * 📖 **Trích Xuất Text & Xuất EPUB Chữ Số (Reflowable):** Bổ sung tính năng trích xuất toàn bộ sách sang file `.txt` Unicode sạch và đóng gói thành sách điện tử EPUB chữ số chuẩn dạng cuộn mượt (Reflowable) kèm ảnh bìa gốc.
 * ⚡ **Bộ Giải Mã AVn/VNI Siêu Tốc (Regex Single-Pass):** Tự động phát hiện và giải mã các font chữ cổ tiếng Việt (AVn, VNI, BK HCM) chỉ trong **0.4 giây** cho toàn bộ 288 trang sách.
 * 👁️ **Hỗ Trợ Tích Hợp PyMuPDF OCR:** Tự động fallback sang công nghệ nhận diện quang học OCR nếu trang PDF là bản scan thuần ảnh không có lớp chữ số.
-* 🎛️ **Chế Độ Thứ 4 Trên GUI:** Thêm lựa chọn `EPUB Chữ & Text (Beta OCR)` ngay trên giao diện ứng dụng.
+* 🎛️ **Chế Độ Thứ 4 Trên GUI:** Thêm lựa chọn `EPUB Chữ (Beta)` ngay trên giao diện ứng dụng.
+
+### v1.3.1
+* 🛡️ **Bộ Lọc Tự Động Nhận Diện Cực Tính (Auto-Polarity Guard):** Tự động phát hiện các trang scan âm bản hoặc PDF `ImageMask` có bảng giải mã nghịch đảo (`/Decode [1 0]`, độ sáng trung bình `< 128`) để đảo cực chuẩn xác.
+* 📄 **Nền Trắng Tinh Khiết & Chữ Đen Nhánh:** Toàn bộ các trang sách ruột (ngay cả các bộ sách dày >700 trang) luôn hiển thị nền trắng `255`, nét chữ và tranh vẽ đen nhánh `0`, loại bỏ 100% tình trạng âm bản (nền đen xì, chữ trắng lóa) và khử sạch hạt bụi/noise xám mốc.
+* 📱 **Khung Hiển Thị Full-Bleed SVG Viewport:** Giữ nguyên bìa gốc, trang ruột full-bleed SVG viewport tự co giãn vừa khít màn hình mọi app đọc sách.
+* 📊 **Dung Lượng Siêu Nhẹ:** Toàn bộ 765 trang siêu nét (`2122 x 3000px`) được nén gọn chỉ còn **25.51 MB** (~33 KB/trang).
 
 ---
 
@@ -65,8 +72,8 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 
 ### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
 Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/epub1t/releases)**:
-* **Windows:** Tải file `Epub1t-v1.3.0-Windows.zip` (giải nén và chạy `Epub1t.exe`).
-* **macOS:** Tải file `Epub1t-v1.3.0-macOS.zip` (giải nén và mở app).
+* **Windows:** Tải file `Epub1t-v1.3.1-Windows.zip` (giải nén và chạy `Epub1t.exe`).
+* **macOS:** Tải file `Epub1t-v1.3.1-macOS.zip` (giải nén và mở app).
 
 ### 2. Hoặc Chạy Trực Tiếp Bằng Python 3.9+
 ```bash

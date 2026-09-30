@@ -97,10 +97,10 @@ Ensures 100% edge-to-edge scaling across all screen sizes and e-reader form fact
 * **Problem:** Vietnamese PDF books published before 2005 (e.g., First News, NXB Trẻ) commonly use 1-byte/2-byte proprietary font encodings (`AVnTechno`, `AVnGiovanni`). Standard text extraction tools produce severely broken diacritics such as `vaâo chuaáng voà khaã nùng àuåt cûuåc` — rendering the extracted text completely unreadable.
 * **Resolution:** A single-pass regex diacritic token analyzer maps base vowels (`a`, `ù`, `ê`, `ï`, `ö`, `ú`, `û`, `à`) and tone marks (`á`, `â`, `ã`, `ä`, `å`) to produce accurate **Unicode UTF-8** output in **<0.5s** for 288 pages, completely avoiding character collision side-effects.
 
-### 3.6. Intelligent Adaptive Binarization Filter
-* Dynamic luminance histogram analysis detects paper background tone.
-* Whiten cutoff forces yellowed/gray paper background to pure `#FFFFFF` (clamping values >= 208), eliminating 100% of speckle dust and noise around text characters.
-* Dark ink strokes are strengthened for maximum contrast and readability on E-Ink readers.
+### 3.6. Intelligent Adaptive Binarization Filter & Auto-Polarity Guard
+* **Auto-Polarity Guard:** Automatically detects negative/inverted scans or PDF `ImageMask` with inverse decode arrays (`/Decode [1 0]`, mean luminance < 128) and inverts them to standard polarity before binarization. Interior pages always output pure white paper background (`255`) and solid black text (`0`).
+* **Paper Whitening:** Dynamic luminance histogram analysis detects paper background tone. Clamping values >= 208 forces yellowed/gray paper background to pure `#FFFFFF`, eliminating 100% of speckle dust and noise around text characters.
+* **Dark Ink Strengthening:** Dark ink strokes are strengthened to solid black for maximum contrast and readability on E-Ink readers.
 
 ### 3.7. Zero-Copy Direct Memory Buffer Streaming
 * Direct pixel buffer handoff from MuPDF C memory into Pillow (`Image.frombytes`) eliminates disk I/O and intermediate file overhead.

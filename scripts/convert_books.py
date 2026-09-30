@@ -5,7 +5,7 @@ import subprocess
 import zipfile
 import uuid
 import io
-from PIL import Image, ImageStat
+from PIL import Image, ImageStat, ImageOps
 import pymupdf
 
 # Support UTF-8 output across platforms
@@ -103,6 +103,10 @@ def binarize_image(pil_img, bg_whiten_cutoff=208, dark_ink_cutoff=55):
     """
     gray = pil_img.convert('L')
     
+    # Auto-detect negative / inverted polarity (e.g. PDF ImageMask or dark scan)
+    if ImageStat.Stat(gray).mean[0] < 128:
+        gray = ImageOps.invert(gray)
+
     # Calculate paper brightness dynamically from high percentiles
     hist = gray.histogram()
     total = gray.width * gray.height
@@ -130,7 +134,10 @@ def binarize_image(pil_img, bg_whiten_cutoff=208, dark_ink_cutoff=55):
             lut.append(val)
             
     stretched = gray.point(lut)
-    return stretched.convert('1', dither=Image.Dither.FLOYDSTEINBERG)
+    res = stretched.convert('1', dither=Image.Dither.FLOYDSTEINBERG)
+    if ImageStat.Stat(res.convert('L')).mean[0] < 128:
+        res = ImageOps.invert(res.convert('L')).convert('1')
+    return res
 
 
 def convert_document_to_epub(src_path, delete_source=False, auto_fix_cover=True):
@@ -238,10 +245,18 @@ def convert_scanned_pdf_to_epub(
             if len(imgs) == 1:
                 try:
                     xref = imgs[0][0]
-                    base_info = doc.extract_image(xref)
-                    # If embedded image is already high resolution (>= 1600px height)
-                    if base_info['height'] >= 1600:
-                        raw_img = Image.open(io.BytesIO(base_info['image']))
+                    obj_dict = doc.xref_object(xref)
+                    # Skip raw extraction for ImageMask or inverted decode to let MuPDF render correct polarity
+                    if '/ImageMask true' not in obj_dict and '/Decode' not in obj_dict and '/ImageMask' not in obj_dict:
+                        base_info = doc.extract_image(xref)
+                        # If embedded image is already high resolution (>= 1600px height)
+                        if base_info['height'] >= 1600:
+                            extracted = Image.open(io.BytesIO(base_info['image']))
+                            # Polarity safety check on extracted native image
+                            if ImageStat.Stat(extracted.convert('L')).mean[0] < 128:
+                                raw_img = None  # Fallback to MuPDF renderer
+                            else:
+                                raw_img = extracted
                 except Exception:
                     raw_img = None
 
@@ -261,6 +276,8 @@ def convert_scanned_pdf_to_epub(
             # Page 0 is always preserved as high-res RGB color
             if i == 0 or mode == 'color':
                 rgb_img = raw_img.convert('RGB')
+                if i > 0 and ImageStat.Stat(rgb_img.convert('L')).mean[0] < 128:
+                    rgb_img = ImageOps.invert(rgb_img)
                 buf = io.BytesIO()
                 rgb_img.save(buf, format='JPEG', quality=max(85, jpeg_quality))
                 out_bytes = buf.getvalue()
@@ -275,6 +292,8 @@ def convert_scanned_pdf_to_epub(
                 media_type = 'image/png'
             elif mode == 'grayscale':
                 pil_img = raw_img.convert('L')
+                if ImageStat.Stat(pil_img).mean[0] < 128:
+                    pil_img = ImageOps.invert(pil_img)
                 buf = io.BytesIO()
                 pil_img.save(buf, format='JPEG', quality=jpeg_quality)
                 out_bytes = buf.getvalue()

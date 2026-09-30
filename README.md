@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.1-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -14,6 +14,7 @@
 
 - ⚡ **1-Bit Monochrome Bilevel Compression:** Transforms heavy 24-bit RGB scanned text PDFs (>100MB) into lightweight Fixed-Layout EPUBs (20-35MB) with razor-sharp vector-like clarity at high resolutions (2000px - 3400px).
 - 🚀 **High-Speed Direct Buffer Pipeline:** Zero-copy pixel buffer streaming and instant PNG encoding — converts a 300-page book in **under 25 seconds** (4.5x faster).
+- 🛡️ **Auto-Polarity Guard:** Automatically detects negative/inverted scans or PDF `ImageMask` with inverse decode arrays (`/Decode [1 0]`, mean luminance < 128), ensuring interior pages render with pure white paper backgrounds (`255`) and solid black text/drawings (`0`).
 - 🧹 **Intelligent Adaptive Binarization & Anti-Noise:** Auto-whitening scan paper background tone while preserving illustration sketches, completely eliminating grainy dust and speckle noise.
 - 🎨 **Official Illustrated Cover Restoration:** Automatically extracts the real first-page cover from PDF/source files and replaces Calibre's generic 2-tone placeholder cover.
 - 🧹 **Artifact & Ghost Page Cleaner:** Detects blank spacer pages using histogram standard deviation analysis (`mean >= 250`, `stddev <= 3.5`) and strips away fragmented Calibre `pdftohtml` multi-layer images (`_2.jpg`, `_3.png`, sub-3KB noise).
@@ -57,7 +58,13 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 * 📖 **Text Extraction & Reflowable EPUB Export:** Automatically extract full book content into clean UTF-8 `.txt` and pack into standard reflowable EPUB ebooks with original cover art.
 * ⚡ **Blazing Fast AVn/VNI Decoding (Regex Single-Pass):** Auto-detects and decodes legacy Vietnamese composite font diacritics in **<0.5s** for 288 pages.
 * 👁️ **Built-in PyMuPDF OCR Fallback:** Automatically falls back to optical character recognition for scan pages without a selectable digital text layer.
-* 🎛️ **4th GUI Mode:** Added `Reflowable Text & EPUB (Beta OCR)` mode directly in the interface.
+* 🎛️ **4th GUI Mode:** Added `Reflowable EPUB (Beta)` mode directly in the interface.
+
+### v1.3.1
+* 🛡️ **Auto-Polarity Guard:** Automatically detects negative/inverted polarity scans and PDF `ImageMask` with inverted decode arrays (`/Decode [1 0]`, mean luminance < 128), ensuring pure white paper backgrounds (`255`) and solid black text/drawings (`0`).
+* 📄 **Zero Dust & Speckle Noise:** Eliminates inverted black-background bugs entirely across massive multi-hundred page books while eliminating grayish background noise.
+* 📱 **Full-Bleed SVG Viewport:** Edge-to-edge adaptive viewport scaling without distortion or letterboxing across all e-reader apps.
+* 📊 **Record Compression Ratio:** Compresses full 765 high-resolution pages (`2122 x 3000px`) down to just **25.51 MB** (~33 KB/page).
 
 ---
 
@@ -65,8 +72,8 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 
 ### 1. Download Standalone App (No Python required)
 Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/epub1t/releases)** page:
-* **Windows:** Download `Epub1t-v1.3.0-Windows.zip` (extract and run `Epub1t.exe`).
-* **macOS:** Download `Epub1t-v1.3.0-macOS.zip` (extract and open the app bundle).
+* **Windows:** Download `Epub1t-v1.3.1-Windows.zip` (extract and run `Epub1t.exe`).
+* **macOS:** Download `Epub1t-v1.3.1-macOS.zip` (extract and open the app bundle).
 
 ### 2. Or Run from Source (Python 3.9+)
 ```bash
