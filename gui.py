@@ -11,12 +11,12 @@ from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_
 from scripts.clean_large_epubs import clean_epub_artifacts
 from scripts.fix_epub_covers import fix_epub_cover
 
-CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".ebook_1bit_optimizer_config.json")
+CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".epub1t_config.json")
 
 TEXTS = {
     'vi': {
-        'app_title': "Ebook Convert & 1-Bit Optimizer 📚",
-        'title': "Ebook 1-Bit Mono & EPUB Optimizer",
+        'app_title': "Epub1t — Ebook to EPUB 1-Bit Optimizer 📚",
+        'title': "Epub1t",
         'subtitle': "Chuyển đổi sách chữ & tối ưu hoá PDF scan sang EPUB siêu nhẹ",
         'lang_label': "Ngôn ngữ:",
         'path_group': " 📂 Chọn File hoặc Thư Mục Sách ",
@@ -56,8 +56,8 @@ TEXTS = {
         'status_fail': "Thất bại",
     },
     'en': {
-        'app_title': "Ebook Convert & 1-Bit Optimizer 📚",
-        'title': "Ebook 1-Bit Mono & EPUB Optimizer",
+        'app_title': "Epub1t — Ebook to EPUB 1-Bit Optimizer 📚",
+        'title': "Epub1t",
         'subtitle': "Convert books & optimize scanned PDFs into lightweight EPUBs",
         'lang_label': "Language:",
         'path_group': " 📂 Select Book File or Directory ",

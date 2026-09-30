@@ -1,4 +1,4 @@
-# ebook-convert-1bitmono 📚⚡
+# epub1t 📚⚡
 
 > Automated high-performance ebook conversion & optimization pipeline. Converts documents & scanned PDFs to lightweight, razor-sharp EPUBs with 1-bit monochrome bilevel compression, ghost page pruning, and smart cover extraction.
 
@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
+[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -34,14 +34,14 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 ## 📦 Prerequisites & Installation
 
 ### 1. Download Standalone App (No Python required)
-Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)** page:
-* **Windows:** Download `Ebook1BitOptimizer-v1.1.0-Windows.zip` (extract and run `Ebook1BitOptimizer.exe`).
-* **macOS:** Download `Ebook1BitOptimizer-v1.1.0-macOS.zip` (extract and open the app bundle).
+Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/epub1t/releases)** page:
+* **Windows:** Download `Epub1t-v1.1.0-Windows.zip` (extract and run `Epub1t.exe`).
+* **macOS:** Download `Epub1t-v1.1.0-macOS.zip` (extract and open the app bundle).
 
 ### 2. Or Run from Source (Python 3.9+)
 ```bash
-git clone https://github.com/trungtypo-png/ebook-convert-1bitmono.git
-cd ebook-convert-1bitmono
+git clone https://github.com/trungtypo-png/epub1t.git
+cd epub1t
 pip install -r requirements.txt
 python gui.py
 ```

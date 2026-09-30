@@ -1,4 +1,4 @@
-# ebook-convert-1bitmono 📚⚡
+# epub1t 📚⚡
 
 > Pipeline tự động hóa chuyển đổi và tối ưu hóa sách điện tử & tài liệu scan sang định dạng EPUB chuẩn chất lượng cao. Tích hợp chuẩn nén 1-bit Monochrome Bilevel siêu nhẹ, khử trang trắng rác và tự động phục hồi ảnh bìa minh họa gốc.
 
@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)
+[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -15,6 +15,7 @@
 - ⚡ **Chuẩn Nén 1-Bit Monochrome Bilevel:** Biến các cuốn sách scan chữ dung lượng nặng (>100MB) thành file EPUB Fixed-Layout siêu nhẹ (chỉ còn ~20–35MB) mà vẫn giữ độ sắc nét từng nét chữ ở độ phân giải cao (2000px - 3400px).
 - 🎨 **Tự Động Phục Hồi Bìa Sách Minh Họa Gốc:** Tự động trích xuất ảnh bìa chất lượng cao từ trang đầu tiên của file gốc và thay thế bìa tạm 2 màu mặc định của Calibre.
 - 🧹 **Khử Sạch Layer Rác & Trang Trắng Đệm:** Sử dụng thuật toán phân tích histogram độ lệch chuẩn (`mean >= 250`, `stddev <= 3.5`) để loại bỏ 100% trang trắng rác, đồng thời bóc tách sạch các layer phân mảnh `_2.jpg`, `_3.png` và icon `<3KB` do Calibre `pdftohtml` sinh ra.
+- 🔡 **Giải Mã Font Chữ Cổ AVn / VNI-Times:** Tự động sửa lỗi vỡ dấu tiếng Việt nghiêm trọng (`vaâo → vào`, `khoaû → khỏa`) trong các sách PDF xuất bản trước năm 2005 — xuất ra EPUB Unicode UTF-8 chuẩn dưới 1MB.
 - 📱 **Khung Hiển Thị Responsive SVG Viewport:** Sử dụng thẻ `<svg viewBox="0 0 w h">` giúp trang sách tự động phóng to vừa vặn 100% cửa sổ đọc trên mọi loại thiết bị (Kindle, Kobo, iPad, điện thoại, máy tính) mà không bị viền đen hay lệch khung hình.
 - 🛡️ **Bảo Toàn Dữ Liệu An Toàn:** Tự động kiểm tra tính toàn vẹn của file EPUB (`META-INF/container.xml`) trước khi quyết định xóa file nguồn cũ.
 
@@ -23,14 +24,14 @@
 ## 📦 Cài Đặt & Sử Dụng
 
 ### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
-Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/ebook-convert-1bitmono/releases)**:
-* **Windows:** Tải file `Ebook1BitOptimizer-Windows.zip` (giải nén và chạy `Ebook1BitOptimizer.exe`).
-* **macOS:** Tải file `Ebook1BitOptimizer-macOS.tar.gz`.
+Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/epub1t/releases)**:
+* **Windows:** Tải file `Epub1t-v1.1.0-Windows.zip` (giải nén và chạy `Epub1t.exe`).
+* **macOS:** Tải file `Epub1t-v1.1.0-macOS.zip` (giải nén và mở app).
 
 ### 2. Hoặc Chạy Trực Tiếp Bằng Python 3.9+
 ```bash
-git clone https://github.com/trungtypo-png/ebook-convert-1bitmono.git
-cd ebook-convert-1bitmono
+git clone https://github.com/trungtypo-png/epub1t.git
+cd epub1t
 pip install -r requirements.txt
 python gui.py
 ```

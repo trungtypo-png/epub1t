@@ -29,14 +29,14 @@ jobs:
 
       - name: Build Windows EXE
         run: |
-          pyinstaller --noconfirm --onedir --windowed --name "Ebook1BitOptimizer" gui.py
-          Compress-Archive -Path dist/Ebook1BitOptimizer -DestinationPath dist/Ebook1BitOptimizer-${{ github.ref_name }}-Windows.zip
+          pyinstaller --noconfirm --onedir --windowed --name "Epub1t" gui.py
+          Compress-Archive -Path dist/Epub1t -DestinationPath dist/Epub1t-${{ github.ref_name }}-Windows.zip
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ebook1BitOptimizer-Windows
-          path: dist/Ebook1BitOptimizer-${{ github.ref_name }}-Windows.zip
+          name: Epub1t-Windows
+          path: dist/Epub1t-${{ github.ref_name }}-Windows.zip
 
   build-macos:
     runs-on: macos-latest
@@ -57,15 +57,15 @@ jobs:
 
       - name: Build macOS App Bundle
         run: |
-          pyinstaller --noconfirm --onedir --windowed --name "Ebook1BitOptimizer" gui.py
+          pyinstaller --noconfirm --onedir --windowed --name "Epub1t" gui.py
           cd dist
-          zip -r Ebook1BitOptimizer-${{ github.ref_name }}-macOS.zip Ebook1BitOptimizer.app
+          zip -r Epub1t-${{ github.ref_name }}-macOS.zip Epub1t.app
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ebook1BitOptimizer-macOS
-          path: dist/Ebook1BitOptimizer-${{ github.ref_name }}-macOS.zip
+          name: Epub1t-macOS
+          path: dist/Epub1t-${{ github.ref_name }}-macOS.zip
 
   release:
     needs: [build-windows, build-macos]
@@ -75,12 +75,12 @@ jobs:
       - name: Download Windows Artifact
         uses: actions/download-artifact@v4
         with:
-          name: Ebook1BitOptimizer-Windows
+          name: Epub1t-Windows
 
       - name: Download macOS Artifact
         uses: actions/download-artifact@v4
         with:
-          name: Ebook1BitOptimizer-macOS
+          name: Epub1t-macOS
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -90,7 +90,7 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            Ebook1BitOptimizer-${{ github.ref_name }}-Windows.zip
-            Ebook1BitOptimizer-${{ github.ref_name }}-macOS.zip
+            Epub1t-${{ github.ref_name }}-Windows.zip
+            Epub1t-${{ github.ref_name }}-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
