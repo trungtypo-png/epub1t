@@ -15,6 +15,7 @@
 - ⚡ **1-Bit Monochrome Bilevel Compression:** Transforms heavy 24-bit RGB scanned text PDFs (>100MB) into lightweight Fixed-Layout EPUBs (20-35MB) with razor-sharp vector-like clarity at high resolutions (2000px - 3400px).
 - 🎨 **Official Illustrated Cover Restoration:** Automatically extracts the real first-page cover from PDF/source files and replaces Calibre's generic 2-tone placeholder cover.
 - 🧹 **Artifact & Ghost Page Cleaner:** Detects blank spacer pages using histogram standard deviation analysis (`mean >= 250`, `stddev <= 3.5`) and strips away fragmented Calibre `pdftohtml` multi-layer images (`_2.jpg`, `_3.png`, sub-3KB noise).
+- 🔡 **AVn / VNI-Times Legacy Font Decoding:** Fixes severely broken Vietnamese diacritics (`vaâo → vào`, `khoaû → khỏa`) in pre-2005 PDF books using composite PostScript diacritic token analysis — outputs clean Unicode UTF-8 EPUBs under 1MB.
 - 📱 **Responsive SVG Viewport:** Implements `<svg viewBox="0 0 w h">` wrappers so fixed-layout pages perfectly adapt to any e-reader/tablet resolution without letterboxing.
 - 🛡️ **Safe Source Deletion:** Validates EPUB structural integrity (`META-INF/container.xml` verification) before removing source files.
 
