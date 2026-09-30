@@ -6,13 +6,14 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.1.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.1.2-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
 ## 🌟 Key Features
 
 - ⚡ **1-Bit Monochrome Bilevel Compression:** Transforms heavy 24-bit RGB scanned text PDFs (>100MB) into lightweight Fixed-Layout EPUBs (20-35MB) with razor-sharp vector-like clarity at high resolutions (2000px - 3400px).
+- 🧹 **Intelligent Adaptive Binarization & Anti-Noise:** Auto-whitening scan paper background tone while preserving illustration sketches, completely eliminating grainy dust and speckle noise.
 - 🎨 **Official Illustrated Cover Restoration:** Automatically extracts the real first-page cover from PDF/source files and replaces Calibre's generic 2-tone placeholder cover.
 - 🧹 **Artifact & Ghost Page Cleaner:** Detects blank spacer pages using histogram standard deviation analysis (`mean >= 250`, `stddev <= 3.5`) and strips away fragmented Calibre `pdftohtml` multi-layer images (`_2.jpg`, `_3.png`, sub-3KB noise).
 - 🔡 **AVn / VNI-Times Legacy Font Decoding:** Fixes severely broken Vietnamese diacritics (`vaâo → vào`, `khoaû → khỏa`) in pre-2005 PDF books using composite PostScript diacritic token analysis — outputs clean Unicode UTF-8 EPUBs under 1MB.
@@ -35,8 +36,8 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 
 ### 1. Download Standalone App (No Python required)
 Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/epub1t/releases)** page:
-* **Windows:** Download `Epub1t-v1.1.0-Windows.zip` (extract and run `Epub1t.exe`).
-* **macOS:** Download `Epub1t-v1.1.0-macOS.zip` (extract and open the app bundle).
+* **Windows:** Download `Epub1t-v1.1.2-Windows.zip` (extract and run `Epub1t.exe`).
+* **macOS:** Download `Epub1t-v1.1.2-macOS.zip` (extract and open the app bundle).
 
 ### 2. Or Run from Source (Python 3.9+)
 ```bash
