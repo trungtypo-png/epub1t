@@ -1,12 +1,12 @@
 # epub1t 📚⚡
 
-> Automated high-performance ebook conversion & optimization pipeline. Converts documents & scanned PDFs to lightweight, razor-sharp EPUBs with 1-bit monochrome bilevel compression, ghost page pruning, and smart cover extraction.
+> Automated PDF to EPUB converter and high-performance ebook optimization pipeline. Converts digital documents (PRC, MOBI, AZW, AZW3, DOCX) and scanned PDFs to lightweight, razor-sharp EPUBs with 1-bit monochrome bilevel compression, PyMuPDF OCR, Vietnamese AVn font decoding, ghost page pruning, and smart cover extraction.
 
 **English** | [Tiếng Việt](README.vi.md)
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.2.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -65,8 +65,8 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 
 ### 1. Download Standalone App (No Python required)
 Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/epub1t/releases)** page:
-* **Windows:** Download `Epub1t-v1.2.0-Windows.zip` (extract and run `Epub1t.exe`).
-* **macOS:** Download `Epub1t-v1.2.0-macOS.zip` (extract and open the app bundle).
+* **Windows:** Download `Epub1t-v1.3.0-Windows.zip` (extract and run `Epub1t.exe`).
+* **macOS:** Download `Epub1t-v1.3.0-macOS.zip` (extract and open the app bundle).
 
 ### 2. Or Run from Source (Python 3.9+)
 ```bash
@@ -92,6 +92,9 @@ Run `python gui.py` or double-click the pre-built executable.
 # Convert a folder of books/PDFs (Default 1-bit mode for scans)
 python scripts/convert_books.py "/path/to/books" --mode 1bit
 
+# Convert PDF to reflowable EPUB and extract clean .txt
+python scripts/convert_books.py "/path/to/book.pdf" --mode text
+
 # Convert and safely remove source files upon success
 python scripts/convert_books.py "/path/to/books" --delete-source
 
@@ -101,6 +104,12 @@ python scripts/clean_large_epubs.py "/path/to/books"
 # Fix & restore real book covers
 python scripts/fix_epub_covers.py "/path/to/books"
 ```
+
+---
+
+## 🏷️ Keywords & Search Tags
+
+`pdf to epub`, `pdf to epub converter`, `convert pdf to epub`, `scanned pdf to epub`, `pdf ocr to epub`, `ebook converter`, `prc to epub`, `mobi to epub`, `azw3 to epub`, `docx to epub`, `1-bit monochrome epub`, `kindle epub converter`, `kobo epub optimizer`, `extract text from pdf`, `avn font decoder`, `vietnamese ocr`, `pdf2epub`, `fixed-layout epub`, `reflowable epub`
 
 ---
 

@@ -1,12 +1,12 @@
 # epub1t 📚⚡
 
-> Pipeline tự động hóa chuyển đổi và tối ưu hóa sách điện tử & tài liệu scan sang định dạng EPUB chuẩn chất lượng cao. Tích hợp chuẩn nén 1-bit Monochrome Bilevel siêu nhẹ, khử trang trắng rác và tự động phục hồi ảnh bìa minh họa gốc.
+> Công cụ chuyển đổi PDF sang EPUB (PDF to EPUB Converter) và tối ưu hóa sách điện tử chất lượng cao. Chuyển đổi PDF scan, sách số (PRC, MOBI, AZW, AZW3, DOCX) sang EPUB với chuẩn nén 1-bit Monochrome Bilevel siêu nhẹ, nhận diện OCR PyMuPDF, giải mã font cổ AVn tiếng Việt, khử trang trắng rác và phục hồi ảnh bìa minh họa gốc.
 
 [English](README.md) | **Tiếng Việt**
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.2.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.0-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -65,8 +65,8 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 
 ### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
 Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/epub1t/releases)**:
-* **Windows:** Tải file `Epub1t-v1.2.0-Windows.zip` (giải nén và chạy `Epub1t.exe`).
-* **macOS:** Tải file `Epub1t-v1.2.0-macOS.zip` (giải nén và mở app).
+* **Windows:** Tải file `Epub1t-v1.3.0-Windows.zip` (giải nén và chạy `Epub1t.exe`).
+* **macOS:** Tải file `Epub1t-v1.3.0-macOS.zip` (giải nén và mở app).
 
 ### 2. Hoặc Chạy Trực Tiếp Bằng Python 3.9+
 ```bash
@@ -92,6 +92,9 @@ Chạy `python gui.py` hoặc click đúp file `.exe` / app đã đóng gói.
 # Chuyển đổi toàn bộ thư mục sách/PDF (Chế độ 1-bit scan)
 python scripts/convert_books.py "/duong/dan/thu/muc/sach" --mode 1bit
 
+# Trích xuất toàn bộ text sạch và xuất EPUB chữ số dạng cuộn mượt
+python scripts/convert_books.py "/duong/dan/sach.pdf" --mode text
+
 # Chuyển đổi và xóa an toàn file gốc
 python scripts/convert_books.py "/duong/dan/thu/muc/sach" --delete-source
 
@@ -101,6 +104,12 @@ python scripts/clean_large_epubs.py "/duong/dan/thu/muc/sach"
 # Sửa bìa minh họa gốc
 python scripts/fix_epub_covers.py "/duong/dan/thu/muc/sach"
 ```
+
+---
+
+## 🏷️ Từ Khóa Tìm Kiếm (Keywords)
+
+`chuyển pdf sang epub`, `convert pdf sang epub`, `pdf to epub`, `pdf to epub converter`, `chuyển sách scan sang epub`, `tối ưu hóa epub`, `giải mã font avn`, `phục hồi bìa sách`, `khử trang trắng pdf`, `nén sách 1-bit`, `chuyển prc sang epub`, `chuyển mobi sang epub`, `chuyển azw3 sang epub`, `ocr pdf tiếng việt`, `trích xuất text từ pdf`, `phần mềm làm sách điện tử`, `scanned pdf to epub`, `fixed-layout epub`, `reflowable epub`
 
 ---
 
