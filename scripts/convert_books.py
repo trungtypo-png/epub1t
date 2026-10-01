@@ -173,10 +173,10 @@ def binarize_image(pil_img, bg_whiten_cutoff=208, dark_ink_cutoff=55):
     return res
 
 
-def convert_document_to_epub(src_path, delete_source=False, auto_fix_cover=True):
+def convert_document_to_epub(src_path, auto_fix_cover=True):
     """
     Converts text and rich-document formats (PRC, MOBI, AZW, AZW3, DOCX, DOC, RTF, HTML, FB2, CHM) to EPUB.
-    Validates the result and optionally cleans/fixes the cover and removes the source file.
+    Validates the result and optionally fixes the cover.
     """
     epub_path = os.path.splitext(src_path)[0] + '.epub'
     cmd = [CALIBRE_CONVERT, src_path, epub_path]
@@ -192,8 +192,6 @@ def convert_document_to_epub(src_path, delete_source=False, auto_fix_cover=True)
                 fix_epub_cover(epub_path)
             except Exception:
                 pass
-        if delete_source:
-            os.remove(src_path)
         return True, epub_path
     return False, res.stderr
 
@@ -450,12 +448,11 @@ def convert_digital_pdf_to_epub(pdf_path, auto_fix_cover=True):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: python convert_books.py <file-or-directory> [--mode auto|1bit|grayscale|color|text] [--delete-source]")
+        print("Usage: python convert_books.py <file-or-directory> [--mode auto|1bit|grayscale|color|text]")
         sys.exit(1)
 
     target = sys.argv[1]
     mode = 'auto'
-    del_src = '--delete-source' in sys.argv
     if '--mode' in sys.argv:
         m_idx = sys.argv.index('--mode') + 1
         if m_idx < len(sys.argv):
@@ -478,14 +475,8 @@ if __name__ == '__main__':
         try:
             if ext == '.pdf':
                 ok, res = convert_scanned_pdf_to_epub(f, mode=mode)
-                if ok and del_src:
-                    try:
-                        os.remove(f)
-                        print(f"  -> Source file deleted safely.")
-                    except Exception as e:
-                        print(f"  -> Failed to delete source file: {e}")
             else:
-                ok, res = convert_document_to_epub(f, delete_source=del_src)
+                ok, res = convert_document_to_epub(f)
             print(f"  -> Result: {'OK' if ok else 'FAILED'} ({res})")
         except Exception as e:
             print(f"  -> Error: {e}")

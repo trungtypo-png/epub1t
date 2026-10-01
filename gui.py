@@ -32,7 +32,6 @@ TEXTS = {
         'mode_text': "EPUB Chữ",
         'chk_cover': "Tự động sửa ảnh bìa gốc (Cover Fix)",
         'chk_clean': "Khử trang trắng & layer rác",
-        'chk_del': "Xóa file nguồn cũ sau khi xong",
         'calibre_group': " 🔌 Calibre CLI (Tùy chọn cho sách chữ PRC/MOBI/DOCX) ",
         'calibre_detected': "🟢 Đã nhận diện Calibre: {path}",
         'calibre_not_found': "🟡 Chưa tìm thấy Calibre (Chỉ cần nếu convert PRC/MOBI)",
@@ -56,7 +55,6 @@ TEXTS = {
         'log_auto_text': "   -> [Tự động] Nhận diện: Sách có lớp chữ số -> Chuyển sang EPUB Chữ",
         'log_auto_scan': "   -> [Tự động] Nhận diện: Sách scan thuần ảnh -> Chuyển sang EPUB 1-Bit Đơn sắc",
         'log_txt': "   -> Đã trích xuất Text: {txt_fn}",
-        'log_del': "   -> Đã xóa file nguồn an toàn.",
         'log_done': "\n=== HOÀN TẤT TOÀN BỘ QUY TRÌNH ===",
         'status_ok': "Thành công",
         'status_fail': "Thất bại",
@@ -78,7 +76,6 @@ TEXTS = {
         'mode_text': "Reflowable EPUB",
         'chk_cover': "Auto Restore Real Cover",
         'chk_clean': "Clean Ghost Blank Pages & Artifacts",
-        'chk_del': "Safely Delete Source Files",
         'calibre_group': " 🔌 Calibre CLI (Optional for PRC/MOBI/DOCX text books) ",
         'calibre_detected': "🟢 Calibre Detected: {path}",
         'calibre_not_found': "🟡 Calibre not found (Only needed for PRC/MOBI)",
@@ -101,7 +98,6 @@ TEXTS = {
         'log_result': "   -> Result: {status} ({res})",
         'log_auto_text': "   -> [Auto-Detect] Detected digital text -> Exporting Reflowable EPUB",
         'log_auto_scan': "   -> [Auto-Detect] Detected scanned pages -> Exporting 1-Bit Monochrome EPUB",
-        'log_del': "   -> Source file deleted safely.",
         'log_done': "\n=== PIPELINE FINISHED ===",
         'status_ok': "Success",
         'status_fail': "Failed",
@@ -120,7 +116,6 @@ class EbookConverterApp(tk.Tk):
         self.custom_calibre_path = self._load_config().get("calibre_path", "")
         self.path_var = tk.StringVar()
         self.mode_var = tk.StringVar(value="auto")
-        self.del_src_var = tk.BooleanVar(value=False)
         self.fix_cover_var = tk.BooleanVar(value=True)
         self.clean_art_var = tk.BooleanVar(value=True)
         self.is_processing = False
@@ -212,9 +207,7 @@ class EbookConverterApp(tk.Tk):
         self.c1 = ttk.Checkbutton(chk_frame, text="", variable=self.fix_cover_var)
         self.c1.pack(side=tk.LEFT, padx=(0, 15))
         self.c2 = ttk.Checkbutton(chk_frame, text="", variable=self.clean_art_var)
-        self.c2.pack(side=tk.LEFT, padx=(0, 15))
-        self.c3 = ttk.Checkbutton(chk_frame, text="", variable=self.del_src_var)
-        self.c3.pack(side=tk.LEFT)
+        self.c2.pack(side=tk.LEFT)
 
         # Calibre Engine Status & Settings Frame
         self.calibre_group = ttk.LabelFrame(content, text="", padding="8")
@@ -297,7 +290,6 @@ class EbookConverterApp(tk.Tk):
 
         self.c1.config(text=t['chk_cover'])
         self.c2.config(text=t['chk_clean'])
-        self.c3.config(text=t['chk_del'])
 
         self.calibre_group.config(text=t['calibre_group'])
         self.btn_calibre.config(text=t['btn_calibre_browse'])
@@ -352,7 +344,6 @@ class EbookConverterApp(tk.Tk):
         t = TEXTS[self.lang]
         try:
             mode = self.mode_var.get()
-            del_src = self.del_src_var.get()
             fix_cov = self.fix_cover_var.get()
             clean_art = self.clean_art_var.get()
 
@@ -408,11 +399,8 @@ class EbookConverterApp(tk.Tk):
                                 self.log(t['log_txt'].format(txt_fn=os.path.basename(txt_res)))
                         except Exception:
                             pass
-                    if ok and del_src:
-                        os.remove(f)
-                        self.log(t['log_del'])
                 else:
-                    ok, res = convert_document_to_epub(f, delete_source=del_src, auto_fix_cover=fix_cov)
+                    ok, res = convert_document_to_epub(f, auto_fix_cover=fix_cov)
                     status_str = t['status_ok'] if ok else t['status_fail']
                     self.log(t['log_result'].format(status=status_str, res=os.path.basename(res) if ok else res))
                     if ok and clean_art:

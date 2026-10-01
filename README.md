@@ -1,6 +1,6 @@
 # epub1t 📚⚡
 
-> Automated PDF to EPUB converter and high-performance ebook optimization pipeline. Converts digital documents (PRC, MOBI, AZW, AZW3, DOCX) and scanned PDFs to lightweight, razor-sharp EPUBs with 1-bit monochrome bilevel compression, PyMuPDF OCR, Vietnamese AVn font decoding, ghost page pruning, and smart cover extraction.
+> PDF to EPUB converter optimized for e-readers. Converts scanned PDFs to crisp 1-bit Fixed-Layout EPUBs and digital PDFs to clean Reflowable EPUBs with Vietnamese AVn font decoding.
 
 **English** | [Tiếng Việt](README.vi.md)
 
@@ -10,129 +10,67 @@
 
 ---
 
-## 🌟 Key Features
+## 🔄 Processing Pipeline
 
-- ⚡ **1-Bit Monochrome Bilevel Compression:** Transforms heavy 24-bit RGB scanned text PDFs (>100MB) into lightweight Fixed-Layout EPUBs (20-35MB) with razor-sharp vector-like clarity at high resolutions (2000px - 3400px).
-- 🚀 **High-Speed Direct Buffer Pipeline:** Zero-copy pixel buffer streaming and instant PNG encoding — converts a 300-page book in **under 25 seconds** (4.5x faster).
-- 🛡️ **Auto-Polarity Guard:** Automatically detects negative/inverted scans or PDF `ImageMask` with inverse decode arrays (`/Decode [1 0]`, mean luminance < 128), ensuring interior pages render with pure white paper backgrounds (`255`) and solid black text/drawings (`0`).
-- 🧹 **Intelligent Adaptive Binarization & Anti-Noise:** Auto-whitening scan paper background tone while preserving illustration sketches, completely eliminating grainy dust and speckle noise.
-- 🎨 **Official Illustrated Cover Restoration:** Automatically extracts the real first-page cover from PDF/source files and replaces Calibre's generic 2-tone placeholder cover.
-- 🧹 **Artifact & Ghost Page Cleaner:** Detects blank spacer pages using histogram standard deviation analysis (`mean >= 250`, `stddev <= 3.5`) and strips away fragmented Calibre `pdftohtml` multi-layer images (`_2.jpg`, `_3.png`, sub-3KB noise).
-- 🔡 **AVn / VNI-Times Legacy Font Decoding:** Fixes severely broken Vietnamese diacritics (`vaâo → vào`, `khoaû → khỏa`) in pre-2005 PDF books using composite PostScript diacritic token analysis — outputs clean Unicode UTF-8 EPUBs under 1MB.
-- 📱 **Responsive SVG Viewport:** Implements `<svg viewBox="0 0 w h">` wrappers so fixed-layout pages perfectly adapt to any e-reader/tablet resolution without letterboxing.
-- 🛡️ **Safe Source Deletion:** Validates EPUB structural integrity (`META-INF/container.xml` verification) before removing source files.
-
----
-
-## 🔄 Architecture & Processing Pipeline
-
-epub1t automatically analyzes input documents and routes them through specialized processing engines:
+epub1t auto-detects input type and routes through two dedicated engines:
 
 ```mermaid
-flowchart TD
-    Input["Input Document / Book"] --> Detect{"Format & Content Analysis"}
-    
-    Detect -->|"PDF with Digital Text Layer"| ModeText["Mode: Text (Reflowable EPUB)"]
-    ModeText --> T1["Text Layer Extraction (PyMuPDF Stream)"]
-    T1 --> T2["AVn / VNI / Legacy Vietnamese Diacritic Repair"]
-    T2 --> T3["Running Header / Footer / Watermark Stripping"]
-    T3 --> T4["Natural Paragraph Merging & De-hyphenation"]
-    T4 --> T5["In-Flow Typography & Illustration Grouping"]
-    T5 --> T6["Multi-Image Collage Auto-Preservation"]
-    T6 --> OutText["Result: Pure Text Reflowable EPUB<br/>(Resizable text, dark mode, TOC, ~1-15MB)"]
-
-    Detect -->|"PDF Scanned Book (Image-Only)"| ModeScan["Mode: 1-Bit Bilevel (Fixed-Layout EPUB)"]
-    ModeScan --> S1["Auto-Polarity Guard (Inversion Detection)"]
-    S1 --> S2["Adaptive Paper Whitening & Speckle Noise Removal"]
-    S2 --> S3["Zero-Copy Direct Buffer Streaming"]
-    S3 --> S4["High-Speed 1-Bit Monochrome Bilevel PNG Encoding"]
-    S4 --> S5["Responsive SVG Viewport Scaling (0-margin)"]
-    S5 --> OutScan["Result: Vector-Crisp Fixed-Layout EPUB<br/>(Paper-white background, ~80% size reduction, 20-30MB)"]
-
-    Detect -->|"Legacy Ebooks (PRC, MOBI, AZW, AZW3, DOCX)"| ModeCalibre["Mode: Digital Ebook Conversion"]
-    ModeCalibre --> C1["Calibre Conversion Engine"]
-    C1 --> C2["Automatic Cover Extraction & Repair"]
-    C2 --> C3["Calibre Multi-Layer Artifact & Ghost Page Stripper"]
-    C3 --> OutCalibre["Result: Standard Validated EPUB 3.0"]
+flowchart LR
+    Input["📄 PDF / Ebook"] --> Detect{"Auto-Detect"}
+    Detect -->|"Digital Text PDF"| T["Reflowable EPUB Engine\n(PyMuPDF Text Extraction)"]
+    Detect -->|"Scanned Image PDF"| S["1-Bit Bilevel Engine\n(Zero-Copy Direct Buffer)"]
+    Detect -->|"PRC / MOBI / AZW / DOCX"| C["Calibre Engine"]
+    T --> OutT["📖 Text Reflowable EPUB\n~1-15 MB"]
+    S --> OutS["🖼️ Fixed-Layout EPUB\n20-35 MB, ~80% smaller"]
+    C --> OutC["✅ Standard EPUB 3.0"]
 ```
 
-### ⚡ Two Dedicated Pipelines:
-
-1. **📄 PDF Text Layer ➔ Clean Reflowable EPUB (`pdf text -> chữ`):**
-   * **For:** Digital PDFs containing a live selectable text layer (e-books, digital publications, exported InDesign/Word).
-   * **Workflow:** Direct text extraction via PyMuPDF $\rightarrow$ fixes broken legacy diacritics (AVn, VNI, TCVN3) $\rightarrow$ purges running headers, footers, page numbers and watermarks $\rightarrow$ merges split lines and de-hyphenates broken words $\rightarrow$ centers illustrations and preserves multi-image collage photo plates.
-   * **Output:** Pure, reflowable EPUB with customizable typography, dark mode, and real chapter navigation, typically **1–15 MB**.
-
-2. **🖼️ Scanned PDF ➔ 1-Bit Monochrome Fixed-Layout EPUB (`pdf ảnh -> hình nén 1bit`):**
-   * **For:** Image-only scanned books, vintage documents, paper archives, comics/manga.
-   * **Workflow:** Auto-Polarity Guard (prevents inverted white-on-black pages) $\rightarrow$ adaptive background whitening & speckle noise filtering $\rightarrow$ zero-copy direct memory streaming $\rightarrow$ high-speed 1-bit bilevel compression.
-   * **Output:** Ultra-crisp vector-like display on E-ink screens (Kindle, Kobo, Boox) with pristine white background and **~80% file size reduction** (typically **20–35 MB** for 300–700 pages).
+| Input | Engine | Output |
+|-------|--------|--------|
+| **PDF with text layer** | PyMuPDF text extraction + AVn decoder | Reflowable EPUB — resizable text, dark mode, live TOC |
+| **Scanned PDF / manga** | 1-bit bilevel + auto-polarity | Fixed-Layout EPUB — vector-crisp on E-ink, 80% size cut |
+| **PRC, MOBI, AZW, DOCX** | Calibre CLI + cover fixer | Standard EPUB 3.0 with real cover |
 
 ---
 
-## 📊 Real-World Benchmark Results
+## 🌟 Key Features
 
-### 1. 1-Bit Monochrome Bilevel Compression (PDF Scan)
-> Files > 10MB converted from scanned PDF to 1-Bit Monochrome EPUB:
+**For scanned PDFs:**
+- ⚡ **1-Bit Bilevel Compression** — 300-page book in under 25 seconds, ~80% size reduction
+- 🛡️ **Auto-Polarity Guard** — detects and fixes inverted (negative) scans automatically
+- 🧹 **Adaptive Binarization** — whitens yellowed paper, removes speckle noise
 
-![Real-World Optimization Benchmark](./benchmark_results_en.png)
+**For digital PDFs:**
+- 🎯 **Auto-Detect Mode** — inspects text layer density, picks the right engine automatically
+- 🔡 **AVn / VNI Font Decoder** — fixes broken Vietnamese diacritics (`vaâo → vào`) in pre-2005 PDFs
+- 🚫 **Header/Footer/Watermark Stripping** — removes running titles, page numbers, site watermarks
+- 🖼️ **Collage & Illustration Grouping** — preserves photo montage pages and groups consecutive images
 
-Average size reduction: **~80%** across 12 real scanned book collections — without any visible loss in text sharpness.
-
-### 2. AVn / VNI-Times Legacy Font Decoding (Pre-2005 Vietnamese PDFs)
-> Resolving severely corrupted diacritics (`vaâo → vào`, `khoaû → khỏa`, `thûuâng → thường`):
-
-![AVn Legacy Font Decoding Comparison](./avn_font_benchmark.png)
-
-* **Before (Right):** Severely broken PostScript composite characters from legacy 1-byte/2-byte AVn fonts.
-* **After (Left):** Perfectly decoded standard Unicode UTF-8 EPUB with vector-sharp clarity and reflowable text under 1MB.
-
----
-
-## 📝 Changelog
-
-### v1.1.3
-* 🎯 **Native High-Res Auto-Detection:** Automatically extracts embedded original scan images (`2332 x 3444` matching benchmark) without lossy downscaling.
-* 📱 **Full-Viewport Edge-to-Edge SVG:** Cleaned up SVG wrapper markup removing intermediate container margins for true 100% full-screen fit across e-readers.
-* 🧹 **Paper Whitening & Anti-Noise Filter:** Adaptive background tone elimination to remove speckle dust around letters.
-
-### v1.2.0
-* 🚀 **4.5x Speed Boost:** Zero-copy direct memory buffer streaming from MuPDF into Pillow via `Image.frombytes()` and instant PNG encoding (converts a 300-page book in ~23 seconds).
-* 📊 **Real-Time Per-Page Progress UI:** Interactive progress bar and percentage label (`Page X/Total (Y%)`) on GUI.
-
-### v1.3.0 (Beta)
-* 📖 **Text Extraction & Reflowable EPUB Export:** Automatically extract full book content into clean UTF-8 `.txt` and pack into standard reflowable EPUB ebooks with original cover art.
-* ⚡ **Blazing Fast AVn/VNI Decoding (Regex Single-Pass):** Auto-detects and decodes legacy Vietnamese composite font diacritics in **<0.5s** for 288 pages.
-* 👁️ **Built-in PyMuPDF OCR Fallback:** Automatically falls back to optical character recognition for scan pages without a selectable digital text layer.
-* 🎛️ **4th GUI Mode:** Added `Reflowable EPUB (Beta)` mode directly in the interface.
-
-### v1.3.1 (Beta)
-* 🛡️ **Auto-Polarity Guard:** Automatically detects negative/inverted polarity scans and PDF `ImageMask` with inverted decode arrays (`/Decode [1 0]`, mean luminance < 128), ensuring pure white paper backgrounds (`255`) and solid black text/drawings (`0`).
-* 📄 **Zero Dust & Speckle Noise:** Eliminates inverted black-background bugs entirely across massive multi-hundred page books while eliminating grayish background noise.
-* 📱 **Full-Bleed SVG Viewport:** Edge-to-edge adaptive viewport scaling without distortion or letterboxing across all e-reader apps.
-* 📊 **Record Compression Ratio:** Compresses full 765 high-resolution pages (`2122 x 3000px`) down to just **25.51 MB** (~33 KB/page).
-### v1.3.2
-* 🎯 **Intelligent Auto-Detect Mode:** Automatically inspects input documents — routing digital PDFs to the Reflowable Text EPUB engine and scanned books/manga to the 1-Bit Bilevel engine without requiring manual selection.
-* 📖 **Reflowable EPUB Engine Graduation:** Promoted the pure text conversion engine out of Beta with full reader-optimized in-flow typography, chapter hierarchy, and high-performance AVn font recovery.
-* 📖 **Reader-Optimized In-Flow Typography:** Completely eliminated brittle CSS floats that squeezed text into narrow 1-word vertical ribbons on e-reader viewports. All illustrations, diagrams, and blockquotes now render as clean, centered, full-width in-flow elements with balanced line spacing (`1.65`) and justified text alignment.
-* 🖼️ **Multi-Image Collage Auto-Preservation:** Automatically detects complex photo collage pages (multiple tiled images with minimal text) and renders each collage as a single high-resolution, full-page plate (`figure.fig-collage`) instead of fragmenting into dozens of tiny disconnected images.
-* 🖼️ **Consecutive Illustration Grouping & Crisp Captions:** Clusters consecutive illustrations on the same page into unified, centered gallery blocks with crisp italicized `<figcaption>` captions underneath, preventing captions from merging into paragraph body text.
-* 📑 **Hierarchical Heading & Real Chapter TOC:** Intelligently distinguishes major chapter boundaries (e.g., 20pt titles like `GIAI ĐOẠN TRƯỞNG THÀNH`) from in-chapter sub-sections (e.g., 12pt titles like `NHÂN VẬT YOUNG JUMP`), creating clean, working Table of Contents (both EPUB 3 `nav.xhtml` and EPUB 2 `toc.ncx`) without premature chapter fragmentation.
-* 👑 **Centered Vignettes & Chapter Emblems:** Detects centered decorative chapter header emblems and places them cleanly above chapter titles (`.chapter-vignette`).
-* 🚫 **Running Headers & Footers Stripping:** Purges repeated top/bottom running book titles, page numbers, and site watermarks (`Chiasemoi.com`, `thuviensach`, etc.) without breaking sentences.
-* ✍️ **Natural Paragraph Merging & De-hyphenation:** Merges PDF hard line breaks and rejoins split hyphenated words (`kinh-` + `doanh` -> `kinh doanh`) into continuous, beautifully formatted `<p>` paragraphs.
-* 🔡 **Comprehensive Uppercase AVn & Dangling Diacritic Cleaners:** Decodes uppercase Vietnamese title tokens (`ĐOAẢN` -> `ĐOẠN`, `TRƯƠÃNG` -> `TRƯỞNG`, `THAÂNH` -> `THÀNH`, `VÂÅT` -> `VẬT`, `TỘT ĐÓNH` -> `TỘT ĐỈNH`) and removes trailing floating diacritics (`thiế´u` -> `thiếu`).
+**For all formats:**
+- 🎨 **Real Cover Restoration** — replaces Calibre's generic placeholder with the actual book cover
+- 🧹 **Ghost Page Cleaner** — removes blank spacer pages and Calibre pdftohtml artifacts
+- 📱 **SVG Viewport** — edge-to-edge scaling on any e-reader screen
 
 ---
 
-## 📦 Prerequisites & Installation
+## 📊 Benchmark
 
-### 1. Download Standalone App (No Python required)
-Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/epub1t/releases)** page:
-* **Windows:** Download `Epub1t-v1.3.2-Windows.zip` (extract and run `Epub1t.exe`).
-* **macOS:** Download `Epub1t-v1.3.2-macOS.zip` (extract and open the app bundle).
+| Book | Before | After | Reduction |
+|------|--------|-------|-----------|
+| Scanned 300 pages | >100 MB | ~22 MB | **78%** |
+| Scanned 765 pages | >200 MB | 25.5 MB | **87%** |
+| Digital PDF (AVn) | garbled text | clean EPUB | **<1 MB** |
 
-### 2. Or Run from Source (Python 3.9+)
+![Benchmark](./benchmark_results_en.png)
+
+---
+
+## 📦 Installation
+
+**Option 1 — Standalone app** (no Python needed):
+Download from **[Releases](https://github.com/trungtypo-png/epub1t/releases)**: `Epub1t-v1.3.2-Windows.zip` or `Epub1t-v1.3.2-macOS.zip`.
+
+**Option 2 — Run from source:**
 ```bash
 git clone https://github.com/trungtypo-png/epub1t.git
 cd epub1t
@@ -140,75 +78,64 @@ pip install -r requirements.txt
 python gui.py
 ```
 
-### 3. Optional Engine: Calibre CLI
-* Only needed when converting legacy reflowable books (`.prc`, `.mobi`, `.azw3`, `.docx`).
-* Download from [Calibre Official Site](https://calibre-ebook.com/download) or use Calibre Portable.
+> **Optional:** [Calibre](https://calibre-ebook.com/download) — only needed for PRC / MOBI / AZW3 / DOCX conversion.
 
 ---
 
 ## 🚀 Usage
 
-### 1. Graphical Interface (GUI)
-Run `python gui.py` or double-click the pre-built executable.
+**GUI:** Run `python gui.py` or double-click the executable. Select a file or folder, choose mode (or leave on **Auto**), click convert.
 
-### 2. Command Line Interface (CLI)
+**CLI:**
 ```bash
-# Auto-detect mode (Default: Digital text -> Reflowable EPUB; Scanned PDF -> 1-Bit EPUB)
-python scripts/convert_books.py "/path/to/books" --mode auto
+# Auto-detect (default) — digital text → Reflowable EPUB; scan → 1-bit EPUB
+python scripts/convert_books.py "/path/to/books"
 
-# Force 1-bit monochrome mode for scans
+# Force specific mode
 python scripts/convert_books.py "/path/to/books" --mode 1bit
-
-# Force reflowable text EPUB mode
 python scripts/convert_books.py "/path/to/book.pdf" --mode text
 
-# Convert and safely remove source files upon success
-python scripts/convert_books.py "/path/to/books" --delete-source
-
-# Clean multi-layer artifacts & ghost blank pages
-python scripts/clean_large_epubs.py "/path/to/books"
-
-# Fix & restore real book covers
-python scripts/fix_epub_covers.py "/path/to/books"
+# Standalone utilities
+python scripts/clean_large_epubs.py "/path/to/books"   # clean ghost pages & artifacts
+python scripts/fix_epub_covers.py "/path/to/books"     # restore real book covers
 ```
 
 ---
 
-## 💡 Common Use Cases & Problem Solving
+## 📝 Changelog
 
-Whether you are organizing a digital library or preparing books for e-readers, **epub1t** is engineered to solve these core challenges:
+### v1.3.2
+- 🎯 **Auto-Detect Mode** — automatically routes digital PDFs to Reflowable EPUB and scanned PDFs to 1-Bit engine
+- 📖 **Reflowable EPUB** — out of Beta: in-flow typography, real chapter TOC, collage preservation, AVn decoding
+- 🖼️ **Collage Auto-Preservation** — photo montage pages rendered as single full-page plate
+- 📑 **Hierarchical Chapter TOC** — major chapters vs sub-sections, no false splits
+- 🚫 **Running Header/Footer Stripping** — removes watermarks without breaking text
 
-* 📚 **Convert Scanned PDF to EPUB for E-Readers (Xteink, Kindle, Kobo, Boox, iPad):**
-  Raw scanned PDFs (>100MB) cause severe lagging, slow page turns, and memory crashes on e-readers. Epub1t converts scanned PDFs into lightweight Fixed-Layout EPUBs using 1-bit Monochrome Bilevel compression, slashing file sizes by ~80% down to 20–35MB while delivering razor-sharp text clarity at 3000px height.
+### v1.3.1
+- 🛡️ Auto-Polarity Guard for inverted scans
+- 📊 Record compression: 765 pages → 25.51 MB (~33 KB/page)
 
-* 📖 **PDF OCR & Text Extraction to Reflowable EPUB:**
-  Easily transform image-only PDF scans and digital documents into reflowable text EPUBs and clean `.txt` files. Integrated with PyMuPDF OCR to enable resizable fonts, dark mode themes, text searching, and instant dictionary lookups.
+### v1.2.0
+- 🚀 4.5x speed boost via zero-copy direct buffer pipeline
+- 📊 Real-time per-page progress bar
 
-* 🔡 **Fix Broken Vietnamese Diacritics (AVn, VNI, TCVN3 Font Decoder):**
-  Directly converts and recovers garbled text from pre-2005 Vietnamese PDF books (`vaâo → vào`, `thûuâng → thường`) into clean Unicode UTF-8 text in less than 0.5 seconds.
-
-* 🔄 **Batch Ebook Format Conversion (PRC, MOBI, AZW, AZW3, DOCX to EPUB):**
-  Streamlines your entire digital book catalog into modern EPUB 3 files with structural validation (`META-INF/container.xml`) and optional safe deletion of obsolete source files.
-
-* 🎨 **Restore Real Illustrated Book Covers & Purge Blank Pages:**
-  Eliminates Calibre's generic two-tone placeholder covers by extracting authentic high-resolution covers from page 0, while stripping out ghost blank pages and fragmented image layers.
-
----
-
-## 🤝 Acknowledgements & Credits
-
-Special thanks to the creators and maintainers of the open-source projects that inspire and power this pipeline:
-
-* **[Calibre](https://github.com/kovidgoyal/calibre)** by *Kovid Goyal* and contributors — The gold standard for digital ebook conversion and management.
-* **[Kindle Comic Converter (KCC)](https://github.com/ciromattia/kcc)** by *Ciro Mattia*, *Darío Marcelino* and contributors — Pioneer in comic/manga e-reader optimization.
-* **[PyMuPDF (FitZ)](https://github.com/pymupdf/PyMuPDF)** by *Artifex Software* & the *PyMuPDF Team* — High-performance PDF rendering and extraction.
-* **[Pillow (PIL)](https://github.com/python-pillow/Pillow)** by *Jeffrey A. Clark* and contributors — Python imaging library.
+### v1.1.x
+- Native high-res scan extraction, paper whitening & anti-noise filter, full-viewport SVG
 
 ---
 
-## 🤖 Antigravity / Agent Skill
+## 🤝 Credits
 
-This repository includes a [`SKILL.md`](./SKILL.md) file ready to be loaded into **Google Antigravity** or other AI agent frameworks to automate library conversion workflows.
+- **[Calibre](https://github.com/kovidgoyal/calibre)** by Kovid Goyal
+- **[PyMuPDF](https://github.com/pymupdf/PyMuPDF)** by Artifex Software
+- **[Pillow](https://github.com/python-pillow/Pillow)** by Jeffrey A. Clark
+- **[KCC](https://github.com/ciromattia/kcc)** by Ciro Mattia & Darío Marcelino
+
+---
+
+## 🤖 AI Agent Skill
+
+Includes [`SKILL.md`](./SKILL.md) for use with **Google Antigravity** or other AI agent frameworks.
 
 ---
 
