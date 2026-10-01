@@ -219,11 +219,16 @@ def convert_scanned_pdf_to_epub(
     - 'color': Keeps full RGB color JPEG (Q80-85).
     - 'text': Extracts text & decodes AVn/VNI fonts -> Reflowable pure text EPUB + clean TXT.
     """
+    if epub_path is None:
+        epub_path = os.path.splitext(pdf_path)[0] + '.epub'
+
     if mode == 'auto':
         if is_digital_text_pdf(pdf_path):
             mode = 'text'
+            print(f"  -> [Auto-Detect] Detected Digital Text PDF -> Converting to Reflowable EPUB")
         else:
             mode = '1bit'
+            print(f"  -> [Auto-Detect] Detected Scanned Image PDF -> Converting to 1-Bit Bilevel EPUB")
 
     if mode == 'text':
         try:
@@ -231,9 +236,6 @@ def convert_scanned_pdf_to_epub(
         except ImportError:
             from extract_text import export_pdf_to_reflowable_epub
         return export_pdf_to_reflowable_epub(pdf_path, epub_path=epub_path, progress_callback=progress_callback)
-
-    if epub_path is None:
-        epub_path = os.path.splitext(pdf_path)[0] + '.epub'
     
     filename = os.path.splitext(os.path.basename(pdf_path))[0]
     title = filename
@@ -475,8 +477,13 @@ if __name__ == '__main__':
         print(f"Processing: {f}...")
         try:
             if ext == '.pdf':
-                # Attempt 1-bit scan optimization by default for PDF scans
                 ok, res = convert_scanned_pdf_to_epub(f, mode=mode)
+                if ok and del_src:
+                    try:
+                        os.remove(f)
+                        print(f"  -> Source file deleted safely.")
+                    except Exception as e:
+                        print(f"  -> Failed to delete source file: {e}")
             else:
                 ok, res = convert_document_to_epub(f, delete_source=del_src)
             print(f"  -> Result: {'OK' if ok else 'FAILED'} ({res})")

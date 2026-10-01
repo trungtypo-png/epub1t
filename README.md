@@ -112,6 +112,8 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 * 📱 **Full-Bleed SVG Viewport:** Edge-to-edge adaptive viewport scaling without distortion or letterboxing across all e-reader apps.
 * 📊 **Record Compression Ratio:** Compresses full 765 high-resolution pages (`2122 x 3000px`) down to just **25.51 MB** (~33 KB/page).
 ### v1.3.2
+* 🎯 **Intelligent Auto-Detect Mode:** Automatically inspects input documents — routing digital PDFs to the Reflowable Text EPUB engine and scanned books/manga to the 1-Bit Bilevel engine without requiring manual selection.
+* 📖 **Reflowable EPUB Engine Graduation:** Promoted the pure text conversion engine out of Beta with full reader-optimized in-flow typography, chapter hierarchy, and high-performance AVn font recovery.
 * 📖 **Reader-Optimized In-Flow Typography:** Completely eliminated brittle CSS floats that squeezed text into narrow 1-word vertical ribbons on e-reader viewports. All illustrations, diagrams, and blockquotes now render as clean, centered, full-width in-flow elements with balanced line spacing (`1.65`) and justified text alignment.
 * 🖼️ **Multi-Image Collage Auto-Preservation:** Automatically detects complex photo collage pages (multiple tiled images with minimal text) and renders each collage as a single high-resolution, full-page plate (`figure.fig-collage`) instead of fragmenting into dozens of tiny disconnected images.
 * 🖼️ **Consecutive Illustration Grouping & Crisp Captions:** Clusters consecutive illustrations on the same page into unified, centered gallery blocks with crisp italicized `<figcaption>` captions underneath, preventing captions from merging into paragraph body text.

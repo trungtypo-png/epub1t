@@ -435,7 +435,7 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
     - Generates both EPUB 3 nav.xhtml and EPUB 2 toc.ncx for universal e-reader compatibility.
     """
     if epub_path is None:
-        epub_path = os.path.splitext(pdf_path)[0] + '_text.epub'
+        epub_path = os.path.splitext(pdf_path)[0] + '.epub'
 
     filename = os.path.splitext(os.path.basename(pdf_path))[0]
     title = filename
