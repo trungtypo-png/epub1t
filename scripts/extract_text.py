@@ -94,6 +94,7 @@ _AVN_RULES = [
     ('nhó', 'nhỉ'), ('Nhó', 'Nhỉ'), ('NHÓ', 'NHỈ'),
     ('bó', 'bỉ'), ('Bó', 'Bỉ'), ('BÓ', 'BỈ'),
     ('mó', 'mỉ'), ('Mó', 'Mỉ'), ('MÓ', 'MỈ'),
+    ('àó', 'đỉ'), ('Àó', 'Đỉ'), ('ÀÓ', 'ĐỈ'),
     ('đó', 'đỉ'), ('Đó', 'Đỉ'), ('ĐÓ', 'ĐỈ'),
     ('hó', 'hỉ'), ('Hó', 'Hỉ'), ('HÓ', 'HỈ'),
     ('só', 'sỉ'), ('Só', 'Sỉ'), ('SÓ', 'SỈ'),
@@ -162,6 +163,8 @@ def clean_vietnamese_text(text):
         (r'\blônh\b(?=\s+(?:vực|đạo))', 'lĩnh'),
         (r'\bthủ lônh\b', 'thủ lĩnh'),
         (r'\bđiềm tônh\b', 'điềm tĩnh'),
+        (r'\bđónh\b', 'đỉnh'),
+        (r'\bĐÓNH\b', 'ĐỈNH'),
     ]
     for pattern, repl in fixes:
         decoded = re.sub(pattern, repl, decoded, flags=re.IGNORECASE)
@@ -349,14 +352,28 @@ def parse_document_into_chapters(pages_text):
                 del current_chapter['lines']
                 chapters.append(current_chapter)
                 
-            heading_title = l0
+            heading_lines = [l0]
             consumed = 1
             if l1 and is_chapter_heading(l1) and len(f"{l0} {l1}") <= 90:
-                heading_title = f"{l0} - {l1}"
+                heading_lines.append(l1)
                 consumed = 2
-                if l2 and is_chapter_heading(l2) and len(f"{heading_title} {l2}") <= 100:
-                    heading_title = f"{heading_title} - {l2}"
+                if l2 and is_chapter_heading(l2) and len(f"{l0} {l1} {l2}") <= 110:
+                    heading_lines.append(l2)
                     consumed = 3
+                    
+            # Combine heading lines naturally
+            heading_title = heading_lines[0]
+            wrappers = {'THÔNG', 'CỦA', 'VÀ', 'CHO', 'KHỎI', 'TRONG', 'VÀO', 'VỚI', 'ĐƯỜNG', 'GIAI ĐOẠN', 'PHONG CÁCH', 'MÔ HÌNH', 'CUỘC CHIẾN', 'NHỮNG SAI', 'TẤN CÔNG', 'NGƯỜI KHÁC', 'MỘT CHÚT', 'NỀN VĂN', 'NHỮNG DÒNG', 'CÁC MỐC', 'THỜI GIAN'}
+            for nxt in heading_lines[1:]:
+                last_w = heading_title.split()[-1] if heading_title else ""
+                if heading_title.endswith(('-', '—', ':', '–')) or nxt.startswith(('-', '—', ':', '–', '“', '"', '‘', "'")):
+                    heading_title = f"{heading_title} {nxt}"
+                elif last_w in wrappers or any(heading_title.endswith(w) for w in wrappers) or len(heading_title.split()) <= 2:
+                    heading_title = f"{heading_title} {nxt}"
+                else:
+                    heading_title = f"{heading_title} - {nxt}"
+            heading_title = re.sub(r'\s*-\s*-\s*', ' - ', heading_title)
+            heading_title = re.sub(r'\s+', ' ', heading_title).strip()
                 
             current_chapter = {
                 'title': heading_title,
