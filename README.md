@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.1-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.2-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -65,7 +65,12 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 * 📄 **Zero Dust & Speckle Noise:** Eliminates inverted black-background bugs entirely across massive multi-hundred page books while eliminating grayish background noise.
 * 📱 **Full-Bleed SVG Viewport:** Edge-to-edge adaptive viewport scaling without distortion or letterboxing across all e-reader apps.
 * 📊 **Record Compression Ratio:** Compresses full 765 high-resolution pages (`2122 x 3000px`) down to just **25.51 MB** (~33 KB/page).
-* 🎛️ **4th GUI Mode:** Added `Reflowable EPUB (Beta)` mode directly in the interface.
+### v1.3.2
+* 📑 **Real Chapters & Working TOC Detection:** Detects genuine book chapters and headings (`Chương X`, `Phần X`, all-caps headings like `MỘT CON NGƯỜI MỘT CON ĐƯỜNG`), separates them into individual chapter XHTML files, and generates both EPUB 3 `nav.xhtml` and EPUB 2 `toc.ncx` for complete navigation support on all e-readers (Kindle, Kobo, Apple Books).
+* 🚫 **Running Headers & Footers Stripping:** Purges repeated top/bottom running book titles, page numbers, and site watermarks (`Chiasemoi.com`, `thuviensach`, etc.) without breaking sentences.
+* ✍️ **Natural Paragraph Merging & De-hyphenation:** Merges PDF hard line breaks and rejoins split hyphenated words (`kinh-` + `doanh` -> `kinh doanh`) into continuous, beautifully formatted `<p>` paragraphs.
+* 🔡 **Comprehensive Uppercase AVn & Dangling Diacritic Cleaners:** Decodes uppercase Vietnamese title tokens (`ĐOAẢN` -> `ĐOẠN`, `TRƯƠÃNG` -> `TRƯỞNG`, `THAÂNH` -> `THÀNH`, `VÂÅT` -> `VẬT`, `TỘT ĐÓNH` -> `TỘT ĐỈNH`) and removes trailing floating diacritics (`thiế´u` -> `thiếu`).
+* 🎨 **Modern E-Reader Typography CSS:** Responsive font sizing, comfortable 1.65 line height, balanced margins, and justified text alignment.
 
 ---
 
@@ -73,8 +78,8 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 
 ### 1. Download Standalone App (No Python required)
 Get the pre-built binaries from the **[Releases](https://github.com/trungtypo-png/epub1t/releases)** page:
-* **Windows:** Download `Epub1t-v1.3.1-Windows.zip` (extract and run `Epub1t.exe`).
-* **macOS:** Download `Epub1t-v1.3.1-macOS.zip` (extract and open the app bundle).
+* **Windows:** Download `Epub1t-v1.3.2-Windows.zip` (extract and run `Epub1t.exe`).
+* **macOS:** Download `Epub1t-v1.3.2-macOS.zip` (extract and open the app bundle).
 
 ### 2. Or Run from Source (Python 3.9+)
 ```bash

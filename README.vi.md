@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.1-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.2-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -65,7 +65,12 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 * 📄 **Nền Trắng Tinh Khiết & Chữ Đen Nhánh:** Toàn bộ các trang sách ruột (ngay cả các bộ sách dày >700 trang) luôn hiển thị nền trắng `255`, nét chữ và tranh vẽ đen nhánh `0`, loại bỏ 100% tình trạng âm bản (nền đen xì, chữ trắng lóa) và khử sạch hạt bụi/noise xám mốc.
 * 📱 **Khung Hiển Thị Full-Bleed SVG Viewport:** Giữ nguyên bìa gốc, trang ruột full-bleed SVG viewport tự co giãn vừa khít màn hình mọi app đọc sách.
 * 📊 **Dung Lượng Siêu Nhẹ:** Toàn bộ 765 trang siêu nét (`2122 x 3000px`) được nén gọn chỉ còn **25.51 MB** (~33 KB/trang).
-* 🎛️ **Chế Độ Thứ 4 Trên GUI:** Thêm lựa chọn `EPUB Chữ (Beta)` ngay trên giao diện ứng dụng.
+### v1.3.2
+* 📑 **Nhận Diện Chương Thực Tế & Tạo Mục Lục Sống (Real Chapters & Working TOC):** Tự động phát hiện các chương và phân mục thực tế (`Chương X`, `Phần X`, tiêu đề in hoa `MỘT CON NGƯỜI MỘT CON ĐƯỜNG`, `GIAI ĐOẠN TRƯỞNG THÀNH`, v.v.), tách thành từng file XHTML độc lập và xây dựng mục lục điều hướng kép chuẩn EPUB 3 (`nav.xhtml`) & EPUB 2 (`toc.ncx`) tương thích 100% Kindle, Kobo, Apple Books.
+* 🚫 **Khử Tiêu Đề Đầu/Cuối Trang & Watermark (Running Headers & Footers Stripping):** Tự động nhận diện và loại bỏ các dòng tiêu đề lặp lại (`Bill Gates đã nói • 11`), số trang cô lập giữa các trang, và các dòng watermark quảng cáo (`Chiasemoi.com`, `thuviensach`, v.v.) mà không làm ngắt quãng câu chữ.
+* ✍️ **Nối Đoạn Văn Mượt Mà & Nối Từ Gạch Nối (Reflowable Paragraphs & De-hyphenation):** Tự động nối các dòng bị ngắt cứng của file PDF thành các đoạn văn `<p>` hoàn chỉnh, thụt lề chuẩn xuất bản, đồng thời tự nối các từ bị tách bởi dấu gạch nối cuối dòng (`kinh-` + `doanh` -> `kinh doanh`).
+* 🔡 **Giải Mã Toàn Diện AVn Chữ Hoa & Dọn Sạch Dấu Lơ Lửng (Dangling Accents):** Bổ sung trọn bộ bảng mã AVn chữ hoa cho tiêu đề (`ĐOAẢN` -> `ĐOẠN`, `TRƯƠÃNG` -> `TRƯỞNG`, `THAÂNH` -> `THÀNH`, `VÂÅT` -> `VẬT`, `TỘT ĐÓNH` -> `TỘT ĐỈNH`) và triệt tiêu các ký tự dấu sắc/huyền/ngã lơ lửng chèn giữa từ ngữ (`thiế´u` -> `thiếu`).
+* 🎨 **Bộ Font Chữ & Layout Typography Chuẩn E-Reader:** Tích hợp CSS tinh tế, kích thước chữ co giãn thông minh, giãn dòng 1.65 thoáng mắt, canh đều hai bên (justify) chuẩn in ấn.
 
 ---
 
@@ -73,8 +78,8 @@ Mức giảm dung lượng trung bình đạt: **~80%** trên toàn bộ 12 bộ
 
 ### 1. Tải Ứng Dụng Đóng Gói Sẵn (Không Cần Cài Python)
 Tải trực tiếp từ mục **[Releases](https://github.com/trungtypo-png/epub1t/releases)**:
-* **Windows:** Tải file `Epub1t-v1.3.1-Windows.zip` (giải nén và chạy `Epub1t.exe`).
-* **macOS:** Tải file `Epub1t-v1.3.1-macOS.zip` (giải nén và mở app).
+* **Windows:** Tải file `Epub1t-v1.3.2-Windows.zip` (giải nén và chạy `Epub1t.exe`).
+* **macOS:** Tải file `Epub1t-v1.3.2-macOS.zip` (giải nén và mở app).
 
 ### 2. Hoặc Chạy Trực Tiếp Bằng Python 3.9+
 ```bash

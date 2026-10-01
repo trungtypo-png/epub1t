@@ -112,6 +112,12 @@ Ensures 100% edge-to-edge scaling across all screen sizes and e-reader form fact
   2. If the page is a pure scan image without a text layer, automatically invokes PyMuPDF's embedded Tesseract OCR engine (`vie.traineddata`).
 * Outputs both a standalone clean `.txt` file and a compliant reflowable `.epub` ebook.
 
+### 3.9. Smart Chapter & TOC Detection, Running Header/Footer Removal & Paragraph Reflow (v1.3.2)
+* **Real Chapters & Working TOC:** Automatically identifies chapter headings (`Chương X`, `Phần X`, all-caps heading blocks like `MỘT CON NGƯỜI MỘT CON ĐƯỜNG`, `GIAI ĐOẠN TRƯỞNG THÀNH`), splits them into dedicated XHTML files, and creates hierarchical Table of Contents (`toc.ncx` for EPUB 2/Kindle and `nav.xhtml` for EPUB 3).
+* **Running Headers & Footers Stripping:** Purges repeated top/bottom running headers (`<title> • <page>`, `<page> • <title>`), isolated page numbers, and site watermarks (`Chiasemoi.com`, `thuviensach`, `tve-4u`) without breaking sentences across page boundaries.
+* **Reflowable Paragraphs & De-hyphenation:** Merges PDF hard line breaks and rejoins split hyphenated words (`kinh-` + `doanh` -> `kinh doanh`) into continuous, beautifully formatted `<p>` paragraphs with standard publishing indentation.
+* **Comprehensive Uppercase AVn & Dangling Accent Cleaning:** Decodes uppercase Vietnamese title tokens (`ĐOAẢN` -> `ĐOẠN`, `TRƯƠÃNG` -> `TRƯỞNG`, `THAÂNH` -> `THÀNH`, `VÂÅT` -> `VẬT`, `TỘT ĐÓNH` -> `TỘT ĐỈNH`) and removes trailing floating diacritics (`thiế´u` -> `thiếu`).
+
 ---
 
 ## 4. Execution Commands & Automation
