@@ -173,9 +173,19 @@ def clean_vietnamese_text(text):
 
 
 def is_avn_encoded(text):
-    """Detects whether a given text chunk exhibits hallmark signatures of AVn encoding."""
+    """
+    Detects whether a given text chunk exhibits hallmark signatures of AVn encoding.
+    Checks both lowercase token patterns and uppercase title patterns.
+    """
     matches = sum(1 for m in _AVN_MARKERS if m in text)
-    return matches >= 2
+    if matches >= 2:
+        return True
+    upper_signatures = ['ÀAÄ', 'VAÂ', 'TÖÍNG', 'BIÏN', 'NGUYÏÎN', 'XUÊËT', 'BAÃN', 'ÀÛÚÂNG', 'MÖÅT', 'ÛÚÃ', 'ÛÚÁ', 'ÛÚÂ', 'ÙÆ', 'ÙÇ', 'ÙÅ']
+    if any(s in text for s in upper_signatures):
+        return True
+    if re.search(r'[ÛÚÖÏÊÙ][ÁÂÃÄÅÆÇËÌÍÑÒÕ]', text):
+        return True
+    return False
 
 
 def is_header_footer_or_watermark(line, page_num):
@@ -314,108 +324,6 @@ def lines_to_paragraphs(lines):
     return paragraphs
 
 
-def parse_document_into_chapters(pages_text):
-    """
-    Parses cleaned page text into a structured hierarchy of real chapters:
-    - Filters running headers/footers and watermarks on every page.
-    - Identifies real chapter and section titles.
-    - Groups paragraphs into their corresponding chapters.
-    - Falls back to 15-page sections if no explicit chapters are found.
-    """
-    chapters = []
-    current_chapter = {'title': 'Mở đầu', 'page_start': 1, 'lines': []}
-    
-    for p_idx, page_text in enumerate(pages_text):
-        page_num = p_idx + 1
-        raw_lines = [l.strip() for l in page_text.splitlines() if l.strip()]
-        if not raw_lines:
-            continue
-            
-        # Strip top and bottom headers/footers
-        while raw_lines and is_header_footer_or_watermark(raw_lines[0], page_num):
-            raw_lines.pop(0)
-        while raw_lines and is_header_footer_or_watermark(raw_lines[-1], page_num):
-            raw_lines.pop()
-            
-        if not raw_lines:
-            continue
-            
-        # Check if page begins with chapter heading
-        l0 = raw_lines[0]
-        l1 = raw_lines[1] if len(raw_lines) > 1 else ""
-        l2 = raw_lines[2] if len(raw_lines) > 2 else ""
-        
-        if is_chapter_heading(l0):
-            # Finish previous chapter
-            if current_chapter['lines']:
-                current_chapter['paragraphs'] = lines_to_paragraphs(current_chapter['lines'])
-                del current_chapter['lines']
-                chapters.append(current_chapter)
-                
-            heading_lines = [l0]
-            consumed = 1
-            if l1 and is_chapter_heading(l1) and len(f"{l0} {l1}") <= 90:
-                heading_lines.append(l1)
-                consumed = 2
-                if l2 and is_chapter_heading(l2) and len(f"{l0} {l1} {l2}") <= 110:
-                    heading_lines.append(l2)
-                    consumed = 3
-                    
-            # Combine heading lines naturally
-            heading_title = heading_lines[0]
-            wrappers = {'THÔNG', 'CỦA', 'VÀ', 'CHO', 'KHỎI', 'TRONG', 'VÀO', 'VỚI', 'ĐƯỜNG', 'GIAI ĐOẠN', 'PHONG CÁCH', 'MÔ HÌNH', 'CUỘC CHIẾN', 'NHỮNG SAI', 'TẤN CÔNG', 'NGƯỜI KHÁC', 'MỘT CHÚT', 'NỀN VĂN', 'NHỮNG DÒNG', 'CÁC MỐC', 'THỜI GIAN'}
-            for nxt in heading_lines[1:]:
-                last_w = heading_title.split()[-1] if heading_title else ""
-                if heading_title.endswith(('-', '—', ':', '–')) or nxt.startswith(('-', '—', ':', '–', '“', '"', '‘', "'")):
-                    heading_title = f"{heading_title} {nxt}"
-                elif last_w in wrappers or any(heading_title.endswith(w) for w in wrappers) or len(heading_title.split()) <= 2:
-                    heading_title = f"{heading_title} {nxt}"
-                else:
-                    heading_title = f"{heading_title} - {nxt}"
-            heading_title = re.sub(r'\s*-\s*-\s*', ' - ', heading_title)
-            heading_title = re.sub(r'\s+', ' ', heading_title).strip()
-                
-            current_chapter = {
-                'title': heading_title,
-                'page_start': page_num,
-                'lines': raw_lines[consumed:]
-            }
-        else:
-            current_chapter['lines'].extend(raw_lines)
-
-    if current_chapter['lines']:
-        current_chapter['paragraphs'] = lines_to_paragraphs(current_chapter['lines'])
-        del current_chapter['lines']
-        chapters.append(current_chapter)
-
-    # Filter out empty chapters or merge if trivial
-    meaningful_chapters = [ch for ch in chapters if ch['paragraphs']]
-    
-    # Fallback if no real chapters were detected
-    if len(meaningful_chapters) <= 1 and len(pages_text) > 25:
-        meaningful_chapters = []
-        chunk_size = 15
-        total_p = len(pages_text)
-        for i in range(0, total_p, chunk_size):
-            p_end = min(i + chunk_size, total_p)
-            chunk_lines = []
-            for p_num in range(i, p_end):
-                p_raw = pages_text[p_num]
-                p_lines = [l.strip() for l in p_raw.splitlines() if l.strip()]
-                while p_lines and is_header_footer_or_watermark(p_lines[0], p_num + 1):
-                    p_lines.pop(0)
-                while p_lines and is_header_footer_or_watermark(p_lines[-1], p_num + 1):
-                    p_lines.pop()
-                chunk_lines.extend(p_lines)
-            meaningful_chapters.append({
-                'title': f'Phần {len(meaningful_chapters) + 1} (Trang {i + 1} - {p_end})',
-                'page_start': i + 1,
-                'paragraphs': lines_to_paragraphs(chunk_lines)
-            })
-
-    return meaningful_chapters
-
-
 def get_tessdata_path(custom_path=None):
     """Locates the tessdata directory for PyMuPDF OCR."""
     if custom_path and os.path.isdir(custom_path):
@@ -446,12 +354,16 @@ def extract_pdf_pages_text(pdf_path, ocr_lang='vie', tessdata_path=None, progres
     """
     Extracts high-accuracy text from each PDF page:
     1. Direct selectable text layer (if >= 30 chars).
-    2. Intelligent AVn font decoding and diacritics cleanup.
-    3. Automatic fallback to PyMuPDF built-in OCR if page is a scan / image only.
+    2. Intelligent AVn font decoding ONLY if AVn diacritics are detected (preserves standard Unicode).
+    3. Automatic fallback to PyMuPDF OCR only for scanned documents (skips graphic/logo plates in digital PDFs).
     """
     doc = pymupdf.open(pdf_path)
     total_pages = len(doc)
     tess_dir = get_tessdata_path(tessdata_path)
+    
+    text_page_count = sum(1 for p in doc if len(p.get_text().strip()) >= 30)
+    is_digital_pdf = (text_page_count / total_pages) >= 0.80
+    
     pages_text = []
 
     for idx, page in enumerate(doc):
@@ -461,21 +373,31 @@ def extract_pdf_pages_text(pdf_path, ocr_lang='vie', tessdata_path=None, progres
             except Exception:
                 pass
 
+        # Page 0 is the cover, omit from text extraction to avoid OCR noise
+        if idx == 0:
+            pages_text.append("")
+            continue
+
         raw_text = page.get_text()
         clean_text = ""
 
         if len(raw_text.strip()) >= 30:
-            clean_text = clean_vietnamese_text(raw_text)
+            if is_avn_encoded(raw_text):
+                clean_text = clean_vietnamese_text(raw_text)
+            else:
+                # Standard Unicode: clean dangling diacritics, keep standard vowels intact
+                clean_text = re.sub(r'([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\^~´`]', r'\1', raw_text)
         else:
-            if tess_dir:
+            if not is_digital_pdf and tess_dir:
                 try:
                     tp = page.get_textpage_ocr(language=ocr_lang, tessdata=tess_dir, dpi=150)
                     ocr_text = tp.extractText()
-                    clean_text = clean_vietnamese_text(ocr_text)
+                    if len(ocr_text.strip()) >= 30:
+                        clean_text = clean_vietnamese_text(ocr_text) if is_avn_encoded(ocr_text) else ocr_text
                 except Exception:
-                    clean_text = clean_vietnamese_text(raw_text)
+                    clean_text = ""
             else:
-                clean_text = clean_vietnamese_text(raw_text)
+                clean_text = ""
 
         pages_text.append(clean_text)
 
@@ -490,13 +412,12 @@ def export_pdf_to_txt(pdf_path, txt_path=None, ocr_lang='vie', tessdata_path=Non
         txt_path = os.path.splitext(pdf_path)[0] + '.txt'
 
     pages = extract_pdf_pages_text(pdf_path, ocr_lang=ocr_lang, tessdata_path=tessdata_path, progress_callback=progress_callback)
-    chapters = parse_document_into_chapters(pages)
     
     with open(txt_path, 'w', encoding='utf-8') as f:
-        for ch in chapters:
-            f.write(f"=== {ch['title']} ===\n\n")
-            for para in ch['paragraphs']:
-                f.write(para)
+        for p_idx, page_content in enumerate(pages, 1):
+            trimmed = page_content.strip()
+            if trimmed:
+                f.write(trimmed)
                 f.write('\n\n')
 
     return True, txt_path
@@ -504,11 +425,12 @@ def export_pdf_to_txt(pdf_path, txt_path=None, ocr_lang='vie', tessdata_path=Non
 
 def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tessdata_path=None, progress_callback=None):
     """
-    Converts PDF text into a standard reflowable EPUB 3 book:
+    Converts PDF into a standard reflowable EPUB 3 book:
     - Real chapters & working Table of Contents (TOC).
-    - Running headers, footers, and watermarks stripped.
+    - Preserves and embeds all interior illustrations, portraits, and diagrams.
+    - Running headers, footers, and site watermarks stripped.
     - Natural reflowable paragraph merging and de-hyphenation.
-    - Preserves authentic high-res cover image.
+    - High-resolution authentic cover image on cover.xhtml.
     - Beautiful modern e-reader typography CSS.
     - Generates both EPUB 3 nav.xhtml and EPUB 2 toc.ncx for universal e-reader compatibility.
     """
@@ -524,25 +446,164 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
         author = parts[1].strip()
 
     doc = pymupdf.open(pdf_path)
+    total_pages = len(doc)
     book_uuid = str(uuid.uuid4())
 
+    text_page_count = sum(1 for p in doc if len(p.get_text().strip()) >= 30)
+    is_digital_pdf = (text_page_count / total_pages) >= 0.80
+
     # Extract authentic cover image from page 0
+    p0 = doc[0]
     cover_bytes = None
-    if len(doc) > 0:
-        p0 = doc[0]
-        imgs = p0.get_images()
-        if len(imgs) >= 1:
+    imgs0 = p0.get_images()
+    if imgs0:
+        try:
+            base_info = doc.extract_image(imgs0[0][0])
+            cover_bytes = base_info['image']
+        except Exception:
+            pass
+    if cover_bytes is None:
+        pix = p0.get_pixmap(dpi=150)
+        cover_bytes = pix.tobytes(output='jpg')
+
+    manifest_items = [
+        '        <item id="style" href="Styles/style.css" media-type="text/css"/>'
+    ]
+    spine_items = []
+    toc_nav_points = []
+    nav_ol_items = []
+    all_images_to_write = []
+
+    # Process all pages from index 1 to total_pages - 1
+    pages_data = []
+    for p_idx in range(1, total_pages):
+        if progress_callback:
             try:
-                base_info = doc.extract_image(imgs[0][0])
-                cover_bytes = base_info['image']
+                progress_callback(p_idx + 1, total_pages)
             except Exception:
                 pass
-        if cover_bytes is None:
-            pix = p0.get_pixmap(dpi=150)
-            cover_bytes = pix.tobytes(output='jpg')
 
-    pages = extract_pdf_pages_text(pdf_path, ocr_lang=ocr_lang, tessdata_path=tessdata_path, progress_callback=progress_callback)
-    chapters = parse_document_into_chapters(pages)
+        page_num = p_idx + 1
+        page = doc[p_idx]
+        raw_text = page.get_text()
+
+        # Extract embedded illustrations on this page
+        p_imgs = []
+        for img_idx, img_info in enumerate(page.get_images()):
+            xref = img_info[0]
+            w, h = img_info[2], img_info[3]
+            if w < 80 or h < 80:
+                continue
+            try:
+                base_img = doc.extract_image(xref)
+                im_bytes = base_img['image']
+                ext = base_img['ext']
+                if len(im_bytes) < 1500:
+                    continue
+                img_rel = f"Images/img_p{page_num:03d}_{img_idx+1:02d}.{ext}"
+                item_id = f"img_p{page_num:03d}_{img_idx+1:02d}"
+                mime = f"image/{ext}" if ext != 'jpg' else 'image/jpeg'
+                p_imgs.append(img_rel)
+                manifest_items.append(f'        <item id="{item_id}" href="{img_rel}" media-type="{mime}"/>')
+                all_images_to_write.append((f"OEBPS/{img_rel}", im_bytes))
+            except Exception:
+                pass
+
+        # Text extraction & decoding
+        cleaned_text = ""
+        if len(raw_text.strip()) >= 30:
+            if is_avn_encoded(raw_text):
+                cleaned_text = clean_vietnamese_text(raw_text)
+            else:
+                # Standard Unicode: clean dangling diacritics without modifying valid vowels
+                cleaned_text = re.sub(r'([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\^~´`]', r'\1', raw_text)
+        else:
+            if not is_digital_pdf:
+                tess_dir = get_tessdata_path(tessdata_path)
+                if tess_dir:
+                    try:
+                        tp = page.get_textpage_ocr(language=ocr_lang, tessdata=tess_dir, dpi=150)
+                        ocr_txt = tp.extractText()
+                        if len(ocr_txt.strip()) >= 30:
+                            cleaned_text = clean_vietnamese_text(ocr_txt) if is_avn_encoded(ocr_txt) else ocr_txt
+                    except Exception:
+                        pass
+
+        lines = [l.strip() for l in cleaned_text.splitlines() if l.strip()]
+        while lines and is_header_footer_or_watermark(lines[0], page_num):
+            lines.pop(0)
+        while lines and is_header_footer_or_watermark(lines[-1], page_num):
+            lines.pop()
+
+        pages_data.append({
+            'page_num': page_num,
+            'lines': lines,
+            'images': p_imgs
+        })
+
+    # Group into chapters
+    chapters = []
+    current_chapter = {'title': 'Thông tin xuất bản', 'page_start': 2, 'items': []}
+
+    for p_info in pages_data:
+        p_num = p_info['page_num']
+        p_lines = p_info['lines']
+        p_imgs = p_info['images']
+
+        if p_lines and is_chapter_heading(p_lines[0]):
+            if current_chapter['items']:
+                chapters.append(current_chapter)
+
+            l0 = p_lines[0]
+            l1 = p_lines[1] if len(p_lines) > 1 else ""
+            l2 = p_lines[2] if len(p_lines) > 2 else ""
+
+            heading_lines = [l0]
+            consumed = 1
+            if l1 and is_chapter_heading(l1) and len(f"{l0} {l1}") <= 90:
+                heading_lines.append(l1)
+                consumed = 2
+                if l2 and is_chapter_heading(l2) and len(f"{l0} {l1} {l2}") <= 110:
+                    heading_lines.append(l2)
+                    consumed = 3
+
+            heading_title = heading_lines[0]
+            wrappers = {'THÔNG', 'CỦA', 'VÀ', 'CHO', 'KHỎI', 'TRONG', 'VÀO', 'VỚI', 'ĐƯỜNG', 'GIAI ĐOẠN', 'PHONG CÁCH', 'MÔ HÌNH', 'CUỘC CHIẾN', 'NHỮNG SAI', 'TẤN CÔNG', 'NGƯỜI KHÁC', 'MỘT CHÚT', 'NỀN VĂN', 'NHỮNG DÒNG', 'CÁC MỐC', 'THỜI GIAN'}
+            for nxt in heading_lines[1:]:
+                last_w = heading_title.split()[-1] if heading_title else ""
+                if heading_title.endswith(('-', '—', ':', '–')) or nxt.startswith(('-', '—', ':', '–', '“', '"', '‘', "'")):
+                    heading_title = f"{heading_title} {nxt}"
+                elif last_w in wrappers or any(heading_title.endswith(w) for w in wrappers) or len(heading_title.split()) <= 2:
+                    heading_title = f"{heading_title} {nxt}"
+                else:
+                    heading_title = f"{heading_title} - {nxt}"
+            heading_title = re.sub(r'\s*-\s*-\s*', ' - ', heading_title)
+            heading_title = re.sub(r'\s+', ' ', heading_title).strip()
+
+            rem_lines = p_lines[consumed:]
+            current_chapter = {
+                'title': heading_title,
+                'page_start': p_num,
+                'items': []
+            }
+            for img_href in p_imgs:
+                current_chapter['items'].append({'type': 'image', 'href': img_href})
+            if rem_lines:
+                paras = lines_to_paragraphs(rem_lines)
+                for pr in paras:
+                    current_chapter['items'].append({'type': 'paragraph', 'text': pr})
+        else:
+            for img_href in p_imgs:
+                current_chapter['items'].append({'type': 'image', 'href': img_href})
+            if p_lines:
+                paras = lines_to_paragraphs(p_lines)
+                for pr in paras:
+                    current_chapter['items'].append({'type': 'paragraph', 'text': pr})
+
+    if current_chapter['items']:
+        chapters.append(current_chapter)
+
+    chapters = [ch for ch in chapters if ch['items']]
 
     css_content = '''@charset "utf-8";
 body {
@@ -577,6 +638,17 @@ p.bullet {
     text-indent: 0;
     padding-left: 1.5em;
 }
+.figure {
+    text-align: center;
+    margin: 1.8em auto;
+}
+.chapter-img {
+    max-width: 95%;
+    height: auto;
+    display: inline-block;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
 nav#toc ol {
     list-style-type: decimal;
     padding-left: 1.5em;
@@ -600,23 +672,15 @@ nav#toc a {
         zf.writestr('META-INF/container.xml', container_xml)
         zf.writestr('OEBPS/Styles/style.css', css_content)
 
-        manifest_items = [
-            '        <item id="style" href="Styles/style.css" media-type="text/css"/>'
-        ]
-        spine_items = []
-        toc_nav_points = []
-        nav_ol_items = []
-
         if cover_bytes:
             zf.writestr('OEBPS/Images/cover.jpg', cover_bytes)
             manifest_items.append('        <item id="cover_img" href="Images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>')
-            
-            cover_xhtml = f'''<?xml version="1.0" encoding="utf-8"?>
+            cover_xhtml = '''<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="vi">
 <head>
     <title>Bìa sách</title>
-    <style>body {{ margin: 0; padding: 0; text-align: center; background-color: #000; }} img {{ max-width: 100%; height: auto; display: block; margin: 0 auto; }}</style>
+    <style>body { margin: 0; padding: 0; text-align: center; background-color: #000; } img { max-width: 100%; height: auto; display: block; margin: 0 auto; }</style>
 </head>
 <body>
     <img src="../Images/cover.jpg" alt="Cover"/>
@@ -626,18 +690,26 @@ nav#toc a {
             manifest_items.append('        <item id="cover_page" href="Text/cover.xhtml" media-type="application/xhtml+xml"/>')
             spine_items.append('        <itemref idref="cover_page"/>')
 
-        # Add Chapters
+        # Write all extracted interior illustrations into OEBPS/Images/
+        for img_rel_path, im_bytes in all_images_to_write:
+            zf.writestr(img_rel_path, im_bytes)
+
+        # Write Chapters
         for chap_idx, chap in enumerate(chapters, 1):
             chap_filename = f'chapter_{chap_idx:03d}.xhtml'
             chap_title_esc = chap['title'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             
             body_html = [f'        <h1 class="chapter-title">{chap_title_esc}</h1>']
-            for para in chap['paragraphs']:
-                safe_p = para.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                if re.match(r'^[•·*–—-]\s+', para):
-                    body_html.append(f'        <p class="bullet">{safe_p}</p>')
-                else:
-                    body_html.append(f'        <p>{safe_p}</p>')
+            for it in chap['items']:
+                if it['type'] == 'image':
+                    img_src = f"../{it['href']}"
+                    body_html.append(f'        <div class="figure"><img src="{img_src}" alt="Minh họa" class="chapter-img"/></div>')
+                elif it['type'] == 'paragraph':
+                    safe_p = it['text'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    if re.match(r'^[•·*–—-]\s+', it['text']):
+                        body_html.append(f'        <p class="bullet">{safe_p}</p>')
+                    else:
+                        body_html.append(f'        <p>{safe_p}</p>')
 
             chap_xhtml = f'''<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
@@ -663,7 +735,7 @@ nav#toc a {
         </navPoint>''')
             nav_ol_items.append(f'            <li><a href="{chap_filename}">{chap_title_esc}</a></li>')
 
-        # Generate EPUB 3 Navigation Document (nav.xhtml)
+        # nav.xhtml (EPUB 3)
         nav_xhtml = f'''<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="vi">
