@@ -24,6 +24,52 @@
 
 ---
 
+## 🔄 Kiến Trúc Luồng Xử Lý (Processing Pipeline)
+
+epub1t tự động phân tích cấu trúc tài liệu đầu vào và điều hướng qua các luồng xử lý chuyên biệt nhằm đạt chất lượng hiển thị tối ưu và dung lượng nhẹ nhất:
+
+```mermaid
+flowchart TD
+    Input["Tài liệu / Sách đầu vào"] --> Detect{"Phân loại nội dung"}
+    
+    Detect -->|"PDF có Lớp Chữ Số (Text Layer)"| ModeText["Luồng 1: PDF Chữ ➔ Text EPUB (Reflowable)"]
+    ModeText --> T1["Trích xuất Text Layer siêu tốc qua PyMuPDF"]
+    T1 --> T2["Bộ giải mã AVn / VNI sửa lỗi vỡ dấu tiếng Việt"]
+    T2 --> T3["Khử sạch Header, Footer, số trang & Watermark rác"]
+    T3 --> T4["Nối đoạn văn mượt mà & Nối từ gạch nối cuối dòng"]
+    T4 --> T5["Bố cục In-Flow căn giữa, gom cụm ảnh & chú thích"]
+    T5 --> T6["Bảo toàn nguyên vẹn trang ảnh ghép (Collage)"]
+    T6 --> OutText["Kết quả: EPUB Chữ Sống Reflowable<br/>(Chỉnh cỡ chữ, phông nền, mục lục sống, ~1-15MB)"]
+
+    Detect -->|"PDF Scan Thuần Ảnh (Scanned Books)"| ModeScan["Luồng 2: PDF Scan ➔ EPUB Nén 1-Bit Monochrome"]
+    ModeScan --> S1["Auto-Polarity Guard (Phát hiện & khử âm bản)"]
+    S1 --> S2["Làm trắng tinh nền giấy & Lọc sạch hạt bụi/noise"]
+    S2 --> S3["Zero-Copy Direct Buffer truyền trực tiếp bộ nhớ"]
+    S3 --> S4["Nén nhị phân 1-bit monochrome siêu tốc (~25s / 300 trang)"]
+    S4 --> S5["Khung SVG Viewport co giãn tràn viền tự nhiên"]
+    S5 --> OutScan["Kết quả: EPUB Fixed-Layout Siêu Nét Trên E-Ink<br/>(Nền trắng muốt, chữ đen vector, giảm ~80% dung lượng, 20-30MB)"]
+
+    Detect -->|"Sách số: PRC, MOBI, AZW, AZW3, DOCX"| ModeCalibre["Luồng 3: Chuyển đổi định dạng Calibre"]
+    ModeCalibre --> C1["Calibre Conversion Engine"]
+    C1 --> C2["Tự động trích xuất bìa gốc chất lượng cao"]
+    C2 --> C3["Dọn sạch rác pdftohtml và trang trắng đệm"]
+    C3 --> OutCalibre["Kết quả: EPUB 3.0 chuẩn hóa toàn diện"]
+```
+
+### ⚡ Hai Nhánh Xử Lý Trọng Tâm:
+
+1. **📄 PDF Chữ ➔ EPUB Chữ Sống (`pdf text -> chữ`):**
+   * **Đối tượng:** Sách số hóa có sẵn lớp chữ (sách xuất bản điện tử, file PDF xuất từ InDesign, Word).
+   * **Luồng xử lý:** Trích xuất text layer trực tiếp $\rightarrow$ giải mã font cổ tiếng Việt (AVn, VNI, TCVN3) bị lỗi dấu $\rightarrow$ bóc sạch header, footer, số trang và watermark $\rightarrow$ nối đoạn văn và nối từ gạch nối cuối dòng $\rightarrow$ căn giữa hình minh họa và giữ nguyên các trang ảnh ghép phức tạp (collage).
+   * **Kết quả:** File EPUB chữ sống dạng cuộn mượt (Reflowable), tùy chỉnh cỡ chữ, phông nền, chế độ đọc đêm, mục lục nhảy chuẩn chương, dung lượng siêu nhẹ chỉ từ **1–15 MB**.
+
+2. **🖼️ PDF Scan ➔ EPUB Ảnh Nén 1-Bit (`pdf ảnh -> hình nén 1bit`):**
+   * **Đối tượng:** Sách scan giấy, tài liệu lưu trữ, truyện tranh manga scan thuần ảnh không có text layer.
+   * **Luồng xử lý:** `Auto-Polarity Guard` tự động triệt tiêu lỗi âm bản $\rightarrow$ thuật toán binarization làm trắng tinh nền giấy ố vàng và lọc sạch hạt bụi rác $\rightarrow$ truyền dữ liệu pixel trực tiếp (zero-copy direct buffer) $\rightarrow$ nén nhị phân 1-bit monochrome bilevel siêu tốc.
+   * **Kết quả:** File EPUB Fixed-Layout hiển thị sắc nét như vector trên màn hình E-ink (Kindle, Kobo, Boox), lật trang tức thì và **giảm dung lượng ngoạn mục ~80%** (từ >150MB xuống chỉ còn **20–35 MB**).
+
+---
+
 ## 📊 Kết Quả Benchmark Thực Tế
 
 ### 1. Chuẩn Nén 1-Bit Monochrome Bilevel (Sách PDF Scan)

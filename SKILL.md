@@ -43,25 +43,24 @@ pip install -r requirements.txt
 
 ```mermaid
 flowchart TD
-    A["Source Document / PDF"] --> B{"Format & Characteristics"}
+    A["Source Document / PDF"] --> B{"Format & Content Analysis"}
     
-    B -->|"PRC / MOBI / AZW3 / DOCX / RTF"| C["Calibre Engine (ebook-convert)"]
+    B -->|"Digital Text PDF (Selectable Text)"| D["PyMuPDF Reflowable Text Engine"]
+    D --> D1["Extract Text Layer & Decode Legacy AVn/VNI Fonts"]
+    D1 --> D2["Strip Headers/Footers & De-hyphenate Paragraphs"]
+    D2 --> D3["In-Flow Typography & Preserve Collage Plates"]
+    D3 --> D4["Package Pure Text Reflowable EPUB (~1-15MB)"]
+    
+    B -->|"Scanned Image PDF (Visual Scan)"| E["PyMuPDF 1-Bit Bilevel Engine"]
+    E --> E1["Auto-Polarity Guard (Inversion Detection)"]
+    E1 --> E2["Paper Whitening & Speckle Noise Pruning"]
+    E2 --> E3["Zero-Copy Direct Buffer 1-Bit PNG Compression"]
+    E3 --> E4["Package Vector-Sharp Fixed-Layout EPUB (20-30MB)"]
+
+    B -->|"PRC / MOBI / AZW3 / DOCX / RTF"| C["Calibre Conversion Engine"]
     C --> C1["Validate Integrity (META-INF/container.xml)"]
-    C1 --> C2["Auto Cover Fixer & Safe Source Deletion"]
-    
-    B -->|"Digital Text PDF (Reflowable)"| D["Calibre ebook-convert + Auto Cover Fixer"]
-    D --> D1["Extract Reflowable Typography & Fonts"]
-    D1 --> D2["Replace generic 2-tone cover with real Page 1 cover"]
-    
-    B -->|"Scanned Image PDF"| E["PyMuPDF / 1-Bit Bilevel Engine"]
-    E --> E1["Histogram Analysis: Purge blank spacer pages"]
-    E1 --> E2["Compress: 1-Bit Bilevel (B&W) or Retina Q80 JPEG"]
-    E2 --> E3["Package EPUB 3 Fixed-Layout (SVG Responsive)"]
-    
-    C2 --> F["Post-processing: clean_large_epubs (Prune _2.jpg, _3.png & icons <3KB)"]
-    D2 --> F
-    E3 --> F
-    F --> G["Done: Ultra-lightweight compliant EPUB (<30MB)"]
+    C1 --> C2["Auto Cover Fixer & Artifact Cleanup"]
+    C2 --> C3["Package Standard EPUB 3.0"]
 ```
 
 ---

@@ -24,6 +24,52 @@
 
 ---
 
+## 🔄 Architecture & Processing Pipeline
+
+epub1t automatically analyzes input documents and routes them through specialized processing engines:
+
+```mermaid
+flowchart TD
+    Input["Input Document / Book"] --> Detect{"Format & Content Analysis"}
+    
+    Detect -->|"PDF with Digital Text Layer"| ModeText["Mode: Text (Reflowable EPUB)"]
+    ModeText --> T1["Text Layer Extraction (PyMuPDF Stream)"]
+    T1 --> T2["AVn / VNI / Legacy Vietnamese Diacritic Repair"]
+    T2 --> T3["Running Header / Footer / Watermark Stripping"]
+    T3 --> T4["Natural Paragraph Merging & De-hyphenation"]
+    T4 --> T5["In-Flow Typography & Illustration Grouping"]
+    T5 --> T6["Multi-Image Collage Auto-Preservation"]
+    T6 --> OutText["Result: Pure Text Reflowable EPUB<br/>(Resizable text, dark mode, TOC, ~1-15MB)"]
+
+    Detect -->|"PDF Scanned Book (Image-Only)"| ModeScan["Mode: 1-Bit Bilevel (Fixed-Layout EPUB)"]
+    ModeScan --> S1["Auto-Polarity Guard (Inversion Detection)"]
+    S1 --> S2["Adaptive Paper Whitening & Speckle Noise Removal"]
+    S2 --> S3["Zero-Copy Direct Buffer Streaming"]
+    S3 --> S4["High-Speed 1-Bit Monochrome Bilevel PNG Encoding"]
+    S4 --> S5["Responsive SVG Viewport Scaling (0-margin)"]
+    S5 --> OutScan["Result: Vector-Crisp Fixed-Layout EPUB<br/>(Paper-white background, ~80% size reduction, 20-30MB)"]
+
+    Detect -->|"Legacy Ebooks (PRC, MOBI, AZW, AZW3, DOCX)"| ModeCalibre["Mode: Digital Ebook Conversion"]
+    ModeCalibre --> C1["Calibre Conversion Engine"]
+    C1 --> C2["Automatic Cover Extraction & Repair"]
+    C2 --> C3["Calibre Multi-Layer Artifact & Ghost Page Stripper"]
+    C3 --> OutCalibre["Result: Standard Validated EPUB 3.0"]
+```
+
+### ⚡ Two Dedicated Pipelines:
+
+1. **📄 PDF Text Layer ➔ Clean Reflowable EPUB (`pdf text -> chữ`):**
+   * **For:** Digital PDFs containing a live selectable text layer (e-books, digital publications, exported InDesign/Word).
+   * **Workflow:** Direct text extraction via PyMuPDF $\rightarrow$ fixes broken legacy diacritics (AVn, VNI, TCVN3) $\rightarrow$ purges running headers, footers, page numbers and watermarks $\rightarrow$ merges split lines and de-hyphenates broken words $\rightarrow$ centers illustrations and preserves multi-image collage photo plates.
+   * **Output:** Pure, reflowable EPUB with customizable typography, dark mode, and real chapter navigation, typically **1–15 MB**.
+
+2. **🖼️ Scanned PDF ➔ 1-Bit Monochrome Fixed-Layout EPUB (`pdf ảnh -> hình nén 1bit`):**
+   * **For:** Image-only scanned books, vintage documents, paper archives, comics/manga.
+   * **Workflow:** Auto-Polarity Guard (prevents inverted white-on-black pages) $\rightarrow$ adaptive background whitening & speckle noise filtering $\rightarrow$ zero-copy direct memory streaming $\rightarrow$ high-speed 1-bit bilevel compression.
+   * **Output:** Ultra-crisp vector-like display on E-ink screens (Kindle, Kobo, Boox) with pristine white background and **~80% file size reduction** (typically **20–35 MB** for 300–700 pages).
+
+---
+
 ## 📊 Real-World Benchmark Results
 
 ### 1. 1-Bit Monochrome Bilevel Compression (PDF Scan)
