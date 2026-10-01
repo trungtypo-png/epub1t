@@ -151,10 +151,13 @@ Chạy `python gui.py` hoặc click đúp file `.exe` / app đã đóng gói.
 
 ### 2. Dòng Lệnh (CLI)
 ```bash
-# Chuyển đổi toàn bộ thư mục sách/PDF (Chế độ 1-bit scan)
+# Chế độ tự động nhận diện (Mặc định: Sách chữ -> EPUB Chữ; Sách scan -> EPUB 1-Bit)
+python scripts/convert_books.py "/duong/dan/thu/muc/sach" --mode auto
+
+# Chế độ chỉ định ép buộc nén 1-bit scan
 python scripts/convert_books.py "/duong/dan/thu/muc/sach" --mode 1bit
 
-# Trích xuất toàn bộ text sạch và xuất EPUB chữ số dạng cuộn mượt
+# Chế độ chỉ định xuất EPUB chữ số dạng cuộn mượt
 python scripts/convert_books.py "/duong/dan/sach.pdf" --mode text
 
 # Chuyển đổi và xóa an toàn file gốc

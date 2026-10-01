@@ -91,6 +91,39 @@ def is_blank_image(img_or_data, mean_thresh=250.0, std_thresh=3.5):
     return False
 
 
+def is_digital_text_pdf(pdf_path, sample_pages=10, min_chars_per_page=120, min_text_page_ratio=0.5):
+    """
+    Detects whether a PDF has an authentic digital text layer (meaning it should be reflowable text),
+    or is a scanned book/manga (which should be 1-bit monochrome bilevel).
+    """
+    try:
+        doc = pymupdf.open(pdf_path)
+        total = len(doc)
+        if total == 0:
+            return False
+        
+        start_p = 1 if total > 1 else 0
+        end_p = min(total, start_p + sample_pages)
+        sampled_count = end_p - start_p
+        if sampled_count <= 0:
+            sampled_count = 1
+            start_p = 0
+            end_p = 1
+
+        text_pages = 0
+        total_chars = 0
+        for p_idx in range(start_p, end_p):
+            t = doc[p_idx].get_text().strip()
+            total_chars += len(t)
+            if len(t) >= min_chars_per_page:
+                text_pages += 1
+                
+        doc.close()
+        return (text_pages / sampled_count >= min_text_page_ratio) or (total_chars / sampled_count >= 150)
+    except Exception:
+        return False
+
+
 def binarize_image(pil_img, bg_whiten_cutoff=208, dark_ink_cutoff=55):
     """
     Intelligent Adaptive Binarization Filter:
@@ -169,21 +202,29 @@ def convert_scanned_pdf_to_epub(
     pdf_path,
     epub_path=None,
     dpi_scale=1.5,
-    mode='1bit',
+    mode='auto',
     jpeg_quality=82,
     skip_blank_pages=True,
     progress_callback=None
 ):
     """
-    Converts scanned PDF books into high-performance Fixed-Layout EPUBs or Reflowable EPUBs.
+    Converts PDF books into high-performance Fixed-Layout EPUBs or Reflowable EPUBs.
     
     Modes:
-    - '1bit' (Default): Preserves RGB cover on page 0, converts interior pages to 1-bit Bilevel Monochrome PNG.
+    - 'auto' (Default): Automatically inspects PDF content; routes digital text PDFs to
+      'text' (Reflowable EPUB) and scanned books/manga to '1bit' (Fixed-Layout EPUB).
+    - '1bit': Preserves RGB cover on page 0, converts interior pages to 1-bit Bilevel Monochrome PNG.
       Produces ultra-sharp text and diagrams at minimal file sizes (30-60 KB per page).
     - 'grayscale': Converts interior pages to 8-bit Grayscale JPEG.
     - 'color': Keeps full RGB color JPEG (Q80-85).
-    - 'text': Beta OCR & AVn font decoding -> Reflowable pure text EPUB + clean TXT.
+    - 'text': Extracts text & decodes AVn/VNI fonts -> Reflowable pure text EPUB + clean TXT.
     """
+    if mode == 'auto':
+        if is_digital_text_pdf(pdf_path):
+            mode = 'text'
+        else:
+            mode = '1bit'
+
     if mode == 'text':
         try:
             from .extract_text import export_pdf_to_reflowable_epub
@@ -407,11 +448,11 @@ def convert_digital_pdf_to_epub(pdf_path, auto_fix_cover=True):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: python convert_books.py <file-or-directory> [--mode 1bit|grayscale|color|text] [--delete-source]")
+        print("Usage: python convert_books.py <file-or-directory> [--mode auto|1bit|grayscale|color|text] [--delete-source]")
         sys.exit(1)
 
     target = sys.argv[1]
-    mode = '1bit'
+    mode = 'auto'
     del_src = '--delete-source' in sys.argv
     if '--mode' in sys.argv:
         m_idx = sys.argv.index('--mode') + 1

@@ -151,10 +151,13 @@ Run `python gui.py` or double-click the pre-built executable.
 
 ### 2. Command Line Interface (CLI)
 ```bash
-# Convert a folder of books/PDFs (Default 1-bit mode for scans)
+# Auto-detect mode (Default: Digital text -> Reflowable EPUB; Scanned PDF -> 1-Bit EPUB)
+python scripts/convert_books.py "/path/to/books" --mode auto
+
+# Force 1-bit monochrome mode for scans
 python scripts/convert_books.py "/path/to/books" --mode 1bit
 
-# Convert PDF to reflowable EPUB and extract clean .txt
+# Force reflowable text EPUB mode
 python scripts/convert_books.py "/path/to/book.pdf" --mode text
 
 # Convert and safely remove source files upon success

@@ -7,7 +7,7 @@ from tkinter import ttk, filedialog, messagebox
 
 # Ensure scripts folder is importable
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub, get_calibre_path
+from scripts.convert_books import convert_document_to_epub, convert_scanned_pdf_to_epub, get_calibre_path, is_digital_text_pdf
 from scripts.clean_large_epubs import clean_epub_artifacts
 from scripts.fix_epub_covers import fix_epub_cover
 from scripts.extract_text import export_pdf_to_txt
@@ -25,10 +25,11 @@ TEXTS = {
         'btn_dir': "Chọn Thư Mục...",
         'opts_group': " ⚙️ Tùy Chọn Chuyển Đổi ",
         'mode_label': "Chế độ PDF:",
-        'mode_1bit': "1-Bit Đơn sắc (Nhẹ & sắc nét)",
-        'mode_color': "Màu gốc (Color)",
-        'mode_gray': "Xám (Grayscale)",
-        'mode_text': "EPUB Chữ (Beta)",
+        'mode_auto': "Tự động (Auto)",
+        'mode_1bit': "1-Bit Đơn sắc",
+        'mode_color': "Màu gốc",
+        'mode_gray': "Xám",
+        'mode_text': "EPUB Chữ",
         'chk_cover': "Tự động sửa ảnh bìa gốc (Cover Fix)",
         'chk_clean': "Khử trang trắng & layer rác",
         'chk_del': "Xóa file nguồn cũ sau khi xong",
@@ -52,6 +53,8 @@ TEXTS = {
         'log_clean': "   -> Dọn layer rác: {msg}",
         'log_cover': "   -> Đã sửa bìa ({desc})",
         'log_result': "   -> Kết quả: {status} ({res})",
+        'log_auto_text': "   -> [Tự động] Nhận diện: Sách có lớp chữ số -> Chuyển sang EPUB Chữ",
+        'log_auto_scan': "   -> [Tự động] Nhận diện: Sách scan thuần ảnh -> Chuyển sang EPUB 1-Bit Đơn sắc",
         'log_txt': "   -> Đã trích xuất Text: {txt_fn}",
         'log_del': "   -> Đã xóa file nguồn an toàn.",
         'log_done': "\n=== HOÀN TẤT TOÀN BỘ QUY TRÌNH ===",
@@ -68,10 +71,11 @@ TEXTS = {
         'btn_dir': "Browse Folder...",
         'opts_group': " ⚙️ Conversion Options ",
         'mode_label': "PDF Mode:",
-        'mode_1bit': "1-Bit Monochrome (Sharp & Ultra Light)",
+        'mode_auto': "Auto-Detect",
+        'mode_1bit': "1-Bit Monochrome",
         'mode_color': "Original Color",
         'mode_gray': "Grayscale",
-        'mode_text': "Reflowable EPUB (Beta)",
+        'mode_text': "Reflowable EPUB",
         'chk_cover': "Auto Restore Real Cover",
         'chk_clean': "Clean Ghost Blank Pages & Artifacts",
         'chk_del': "Safely Delete Source Files",
@@ -95,6 +99,8 @@ TEXTS = {
         'log_clean': "   -> Cleaned artifacts: {msg}",
         'log_cover': "   -> Restored cover ({desc})",
         'log_result': "   -> Result: {status} ({res})",
+        'log_auto_text': "   -> [Auto-Detect] Detected digital text -> Exporting Reflowable EPUB",
+        'log_auto_scan': "   -> [Auto-Detect] Detected scanned pages -> Exporting 1-Bit Monochrome EPUB",
         'log_del': "   -> Source file deleted safely.",
         'log_done': "\n=== PIPELINE FINISHED ===",
         'status_ok': "Success",
@@ -106,14 +112,14 @@ TEXTS = {
 class EbookConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("680x700")
-        self.minsize(620, 580)
+        self.geometry("730x700")
+        self.minsize(660, 580)
 
         # Variables
         self.lang = "vi"
         self.custom_calibre_path = self._load_config().get("calibre_path", "")
         self.path_var = tk.StringVar()
-        self.mode_var = tk.StringVar(value="1bit")
+        self.mode_var = tk.StringVar(value="auto")
         self.del_src_var = tk.BooleanVar(value=False)
         self.fix_cover_var = tk.BooleanVar(value=True)
         self.clean_art_var = tk.BooleanVar(value=True)
@@ -189,12 +195,14 @@ class EbookConverterApp(tk.Tk):
         self.mode_lbl = ttk.Label(mode_frame, text="", font=("Segoe UI", 9, "bold"))
         self.mode_lbl.pack(side=tk.LEFT, padx=(0, 10))
 
+        self.r0 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="auto")
+        self.r0.pack(side=tk.LEFT, padx=(0, 8))
         self.r1 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="1bit")
-        self.r1.pack(side=tk.LEFT, padx=(0, 10))
+        self.r1.pack(side=tk.LEFT, padx=(0, 8))
         self.r2 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="color")
-        self.r2.pack(side=tk.LEFT, padx=(0, 10))
+        self.r2.pack(side=tk.LEFT, padx=(0, 8))
         self.r3 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="grayscale")
-        self.r3.pack(side=tk.LEFT, padx=(0, 10))
+        self.r3.pack(side=tk.LEFT, padx=(0, 8))
         self.r4 = ttk.Radiobutton(mode_frame, text="", variable=self.mode_var, value="text")
         self.r4.pack(side=tk.LEFT)
 
@@ -281,6 +289,7 @@ class EbookConverterApp(tk.Tk):
 
         self.opts_group.config(text=t['opts_group'])
         self.mode_lbl.config(text=t['mode_label'])
+        self.r0.config(text=t['mode_auto'])
         self.r1.config(text=t['mode_1bit'])
         self.r2.config(text=t['mode_color'])
         self.r3.config(text=t['mode_gray'])
@@ -374,16 +383,25 @@ class EbookConverterApp(tk.Tk):
                         if ok:
                             self.log(t['log_cover'].format(desc=desc))
                 elif ext == '.pdf':
+                    effective_mode = mode
+                    if mode == 'auto':
+                        if is_digital_text_pdf(f):
+                            effective_mode = 'text'
+                            self.log(t['log_auto_text'])
+                        else:
+                            effective_mode = '1bit'
+                            self.log(t['log_auto_scan'])
+
                     def page_cb(cur, total):
                         pct = int(cur / total * 100) if total else 0
                         self.progress['value'] = pct
                         self.progress_lbl.config(text=f"Trang {cur}/{total} ({pct}%)" if self.lang == 'vi' else f"Page {cur}/{total} ({pct}%)")
                         self.update_idletasks()
 
-                    ok, res = convert_scanned_pdf_to_epub(f, mode=mode, progress_callback=page_cb)
+                    ok, res = convert_scanned_pdf_to_epub(f, mode=effective_mode, progress_callback=page_cb)
                     status_str = t['status_ok'] if ok else t['status_fail']
                     self.log(t['log_result'].format(status=status_str, res=res))
-                    if mode == 'text' and ok:
+                    if effective_mode == 'text' and ok:
                         try:
                             ok_txt, txt_res = export_pdf_to_txt(f)
                             if ok_txt:
