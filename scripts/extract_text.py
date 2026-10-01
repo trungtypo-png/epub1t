@@ -475,7 +475,8 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
     all_images_to_write = []
 
     # Process all pages from index 1 to total_pages - 1
-    pages_data = []
+    pages_elements = []
+
     for p_idx in range(1, total_pages):
         if progress_callback:
             try:
@@ -485,38 +486,170 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
 
         page_num = p_idx + 1
         page = doc[p_idx]
-        raw_text = page.get_text()
+        pw, ph = page.rect.width, page.rect.height
+        page_raw_text = page.get_text()
+        page_is_avn = is_avn_encoded(page_raw_text)
+        imgs = page.get_images()
 
-        # Extract embedded illustrations on this page
-        p_imgs = []
-        for img_idx, img_info in enumerate(page.get_images()):
-            xref = img_info[0]
-            w, h = img_info[2], img_info[3]
-            if w < 80 or h < 80:
+        # Rule 1: Multi-image Collage Page (trang ghép nhiều ảnh, không hoặc rất ít text)
+        if len(imgs) >= 2 and len(page_raw_text.strip()) < 80:
+            pix = page.get_pixmap(dpi=150)
+            im_bytes = pix.tobytes(output='jpg')
+            img_rel = f"Images/collage_p{page_num:03d}.jpg"
+            item_id = f"collage_p{page_num:03d}"
+            manifest_items.append(f'        <item id="{item_id}" href="{img_rel}" media-type="image/jpeg"/>')
+            all_images_to_write.append((f"OEBPS/{img_rel}", im_bytes))
+
+            cap_raw = page_raw_text.strip()
+            cap = clean_vietnamese_text(cap_raw) if (cap_raw and page_is_avn) else cap_raw
+            cap = re.sub(r'\s+', ' ', cap).strip()
+
+            pages_elements.append({
+                'page_num': page_num,
+                'elements': [{
+                    'y': 50,
+                    'type': 'collage',
+                    'href': img_rel,
+                    'caption': cap if cap else None
+                }]
+            })
+            continue
+
+        elements = []
+
+        # Rule 2: Vector ornaments
+        drawings = page.get_drawings()
+        for d in drawings:
+            r = d['rect']
+            if 20 <= r.width <= 45 and 5 <= r.height <= 20 and len(d['items']) >= 10:
+                if 150 <= (r.x0 + r.x1) / 2 <= 270:
+                    elements.append({
+                        'y': r.y0,
+                        'type': 'ornament'
+                    })
+
+        # Rule 3: Embedded illustrations
+        img_infos = page.get_image_info(xrefs=True)
+        images = []
+        for img_idx, img in enumerate(img_infos):
+            r = img['bbox']
+            w = r[2] - r[0]
+            h = r[3] - r[1]
+            if w < 25 or h < 25:
                 continue
+            if page_num == 1 and w > 380:
+                continue
+
             try:
-                base_img = doc.extract_image(xref)
+                base_img = doc.extract_image(img['xref'])
                 im_bytes = base_img['image']
                 ext = base_img['ext']
-                if len(im_bytes) < 1500:
+                if len(im_bytes) < 800:
                     continue
+
                 img_rel = f"Images/img_p{page_num:03d}_{img_idx+1:02d}.{ext}"
                 item_id = f"img_p{page_num:03d}_{img_idx+1:02d}"
                 mime = f"image/{ext}" if ext != 'jpg' else 'image/jpeg'
-                p_imgs.append(img_rel)
                 manifest_items.append(f'        <item id="{item_id}" href="{img_rel}" media-type="{mime}"/>')
                 all_images_to_write.append((f"OEBPS/{img_rel}", im_bytes))
+
+                is_vignette = (w < 60 and h < 60 and r[1] < 120 and 150 <= (r[0] + r[2])/2 <= 270)
+
+                images.append({
+                    'y': r[1],
+                    'type': 'vignette' if is_vignette else 'image',
+                    'href': img_rel,
+                    'bbox': r,
+                    'caption': None,
+                    'width': w,
+                    'height': h
+                })
             except Exception:
                 pass
 
-        # Text extraction & decoding
-        cleaned_text = ""
-        if len(raw_text.strip()) >= 30:
-            if is_avn_encoded(raw_text):
-                cleaned_text = clean_vietnamese_text(raw_text)
-            else:
-                # Standard Unicode: clean dangling diacritics without modifying valid vowels
-                cleaned_text = re.sub(r'([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\^~´`]', r'\1', raw_text)
+        # Rule 4: Text blocks parsing
+        p_dict = page.get_text('dict')
+        raw_blocks = p_dict['blocks']
+        body_blocks = []
+
+        if len(page_raw_text.strip()) >= 30:
+            for b in raw_blocks:
+                if b.get('type') != 0:
+                    continue
+
+                b_lines = []
+                max_size = 0
+                is_bold = False
+
+                for l in b['lines']:
+                    line_str = ''.join(s['text'] for s in l['spans']).strip()
+                    if line_str:
+                        b_lines.append(line_str)
+                    for s in l['spans']:
+                        if s['size'] > max_size:
+                            max_size = s['size']
+                        if 'bold' in s['font'].lower():
+                            is_bold = True
+
+                full_block_text = ' '.join(b_lines).strip()
+                full_block_text = re.sub(r'\s+', ' ', full_block_text)
+                if not full_block_text:
+                    continue
+
+                if page_is_avn:
+                    full_block_text = clean_vietnamese_text(full_block_text)
+                else:
+                    full_block_text = re.sub(r'([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\^~´`]', r'\1', full_block_text)
+
+                bx = b['bbox']
+                by0 = bx[1]
+
+                # Header / footer filter
+                if by0 < 55 or by0 > 545:
+                    if is_header_footer_or_watermark(full_block_text, page_num) or 'Bill Gates' in full_block_text or re.match(r'^\d+\s*[•·-]\s*Bill', full_block_text) or re.match(r'^Bill\s*Gates.*[•·-]\s*\d+', full_block_text):
+                        continue
+
+                is_pub_meta = any(k in full_block_text.upper() for k in ['BILL GATES SPEAKS', 'BILL GATES ĐÃ NÓI', 'NHÀ XUẤT BẢN', 'NXB', 'SAMSUNG'])
+
+                # Major Chapter Heading (size >= 16pt, uppercase, NOT publisher metadata)
+                if max_size >= 16.0 and full_block_text.isupper() and not is_pub_meta:
+                    body_blocks.append({
+                        'y': by0,
+                        'type': 'text',
+                        'block_type': 'chapter_heading',
+                        'text': full_block_text,
+                        'bbox': bx
+                    })
+                    continue
+
+                # Section Title (size 11.5 - 15.9pt, uppercase/bold)
+                if (11.5 <= max_size < 16.0 or is_pub_meta) and (full_block_text.isupper() or is_bold) and len(full_block_text.split()) <= 10:
+                    body_blocks.append({
+                        'y': by0,
+                        'type': 'text',
+                        'block_type': 'section',
+                        'text': full_block_text,
+                        'bbox': bx
+                    })
+                    continue
+
+                # Quotes
+                if full_block_text.startswith(('“', '"', '‘', '”', '– “', '— “')):
+                    body_blocks.append({
+                        'y': by0,
+                        'type': 'text',
+                        'block_type': 'quote',
+                        'text': full_block_text,
+                        'bbox': bx
+                    })
+                else:
+                    body_blocks.append({
+                        'y': by0,
+                        'type': 'text',
+                        'block_type': 'p',
+                        'text': full_block_text,
+                        'bbox': bx
+                    })
         else:
             if not is_digital_pdf:
                 tess_dir = get_tessdata_path(tessdata_path)
@@ -525,85 +658,112 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                         tp = page.get_textpage_ocr(language=ocr_lang, tessdata=tess_dir, dpi=150)
                         ocr_txt = tp.extractText()
                         if len(ocr_txt.strip()) >= 30:
-                            cleaned_text = clean_vietnamese_text(ocr_txt) if is_avn_encoded(ocr_txt) else ocr_txt
+                            cleaned = clean_vietnamese_text(ocr_txt) if is_avn_encoded(ocr_txt) else ocr_txt
+                            for line in cleaned.splitlines():
+                                line = line.strip()
+                                if line and not is_header_footer_or_watermark(line, page_num):
+                                    body_blocks.append({
+                                        'y': 100,
+                                        'type': 'text',
+                                        'block_type': 'p',
+                                        'text': line,
+                                        'bbox': (50, 100, pw - 50, 120)
+                                    })
                     except Exception:
                         pass
 
-        lines = [l.strip() for l in cleaned_text.splitlines() if l.strip()]
-        while lines and is_header_footer_or_watermark(lines[0], page_num):
-            lines.pop(0)
-        while lines and is_header_footer_or_watermark(lines[-1], page_num):
-            lines.pop()
+        # Rule 5: Match Captions (small text blocks directly underneath or beside an image)
+        for im in images:
+            if im['type'] == 'vignette':
+                continue
+            ir = im['bbox']
+            best_b = None
+            min_dist = 999
+            for b in body_blocks:
+                if b['block_type'] in ('chapter_heading', 'section', 'quote'):
+                    continue
+                by = b['y']
+                bx = b['bbox']
+                words = b['text'].split()
+                if len(words) > 15:
+                    continue
 
-        pages_data.append({
+                # Case A: Directly underneath (within 30pt)
+                if 0 <= (by - ir[3]) <= 30 and (bx[0] <= ir[2] + 25 and bx[2] >= ir[0] - 25):
+                    dist = by - ir[3]
+                    if dist < min_dist:
+                        min_dist = dist
+                        best_b = b
+                # Case B: Beside image (vertical overlap, within 45pt horizontally)
+                elif abs(by - ir[1]) <= 35 and (0 <= bx[0] - ir[2] <= 45):
+                    dist = abs(by - ir[1]) + 10
+                    if dist < min_dist:
+                        min_dist = dist
+                        best_b = b
+
+            if best_b:
+                im['caption'] = best_b['text']
+                if best_b in body_blocks:
+                    body_blocks.remove(best_b)
+
+        elements.extend(images)
+        elements.extend(body_blocks)
+        elements.sort(key=lambda x: x['y'])
+
+        pages_elements.append({
             'page_num': page_num,
-            'lines': lines,
-            'images': p_imgs
+            'elements': elements
         })
 
-    # Group into chapters
+    # Group into Chapters with proper Vignette association
     chapters = []
-    current_chapter = {'title': 'Thông tin xuất bản', 'page_start': 2, 'items': []}
+    current_chapter = {'title': 'Thông tin xuất bản', 'page_start': 2, 'items': [], 'vignette': None}
 
-    for p_info in pages_data:
-        p_num = p_info['page_num']
-        p_lines = p_info['lines']
-        p_imgs = p_info['images']
+    pending_chapter_heading = []
+    pending_vignette = None
 
-        if p_lines and is_chapter_heading(p_lines[0]):
-            if current_chapter['items']:
+    def commit_pending_heading(p_num):
+        nonlocal current_chapter, pending_chapter_heading, pending_vignette
+        if pending_chapter_heading:
+            title_text = ' '.join(pending_chapter_heading).strip()
+            title_text = re.sub(r'\s+', ' ', title_text)
+            if current_chapter['items'] or current_chapter['vignette']:
                 chapters.append(current_chapter)
-
-            l0 = p_lines[0]
-            l1 = p_lines[1] if len(p_lines) > 1 else ""
-            l2 = p_lines[2] if len(p_lines) > 2 else ""
-
-            heading_lines = [l0]
-            consumed = 1
-            if l1 and is_chapter_heading(l1) and len(f"{l0} {l1}") <= 90:
-                heading_lines.append(l1)
-                consumed = 2
-                if l2 and is_chapter_heading(l2) and len(f"{l0} {l1} {l2}") <= 110:
-                    heading_lines.append(l2)
-                    consumed = 3
-
-            heading_title = heading_lines[0]
-            wrappers = {'THÔNG', 'CỦA', 'VÀ', 'CHO', 'KHỎI', 'TRONG', 'VÀO', 'VỚI', 'ĐƯỜNG', 'GIAI ĐOẠN', 'PHONG CÁCH', 'MÔ HÌNH', 'CUỘC CHIẾN', 'NHỮNG SAI', 'TẤN CÔNG', 'NGƯỜI KHÁC', 'MỘT CHÚT', 'NỀN VĂN', 'NHỮNG DÒNG', 'CÁC MỐC', 'THỜI GIAN'}
-            for nxt in heading_lines[1:]:
-                last_w = heading_title.split()[-1] if heading_title else ""
-                if heading_title.endswith(('-', '—', ':', '–')) or nxt.startswith(('-', '—', ':', '–', '“', '"', '‘', "'")):
-                    heading_title = f"{heading_title} {nxt}"
-                elif last_w in wrappers or any(heading_title.endswith(w) for w in wrappers) or len(heading_title.split()) <= 2:
-                    heading_title = f"{heading_title} {nxt}"
-                else:
-                    heading_title = f"{heading_title} - {nxt}"
-            heading_title = re.sub(r'\s*-\s*-\s*', ' - ', heading_title)
-            heading_title = re.sub(r'\s+', ' ', heading_title).strip()
-
-            rem_lines = p_lines[consumed:]
             current_chapter = {
-                'title': heading_title,
+                'title': title_text,
                 'page_start': p_num,
-                'items': []
+                'items': [],
+                'vignette': pending_vignette
             }
-            for img_href in p_imgs:
-                current_chapter['items'].append({'type': 'image', 'href': img_href})
-            if rem_lines:
-                paras = lines_to_paragraphs(rem_lines)
-                for pr in paras:
-                    current_chapter['items'].append({'type': 'paragraph', 'text': pr})
-        else:
-            for img_href in p_imgs:
-                current_chapter['items'].append({'type': 'image', 'href': img_href})
-            if p_lines:
-                paras = lines_to_paragraphs(p_lines)
-                for pr in paras:
-                    current_chapter['items'].append({'type': 'paragraph', 'text': pr})
+            pending_chapter_heading = []
+            pending_vignette = None
 
-    if current_chapter['items']:
+    for p_info in pages_elements:
+        p_num = p_info['page_num']
+        elems = p_info['elements']
+
+        for idx, el in enumerate(elems):
+            if el['type'] == 'vignette':
+                has_heading_below = any(e['type'] == 'text' and e['block_type'] == 'chapter_heading' for e in elems[idx+1:])
+                if has_heading_below:
+                    pending_vignette = el['href']
+                    continue
+                else:
+                    el['type'] = 'image'
+
+            if el['type'] == 'text' and el['block_type'] == 'chapter_heading':
+                pending_chapter_heading.append(el['text'])
+            else:
+                if pending_chapter_heading:
+                    commit_pending_heading(p_num)
+                current_chapter['items'].append(el)
+
+    if pending_chapter_heading:
+        commit_pending_heading(total_pages)
+    if current_chapter['items'] or current_chapter['vignette']:
         chapters.append(current_chapter)
 
-    chapters = [ch for ch in chapters if ch['items']]
+    chapters = [ch for ch in chapters if ch['items'] or ch['vignette']]
 
     css_content = '''@charset "utf-8";
 body {
@@ -615,18 +775,38 @@ body {
     background-color: #fafafa;
 }
 .chapter {
-    margin-bottom: 3em;
+    margin-bottom: 2.5em;
+}
+.chapter-vignette {
+    text-align: center;
+    margin: 1.5em auto 0.6em auto;
+}
+.chapter-vignette img {
+    max-width: 48px;
+    height: auto;
+    display: inline-block;
 }
 h1.chapter-title {
-    font-size: 1.5em;
+    font-size: 1.45em;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.35;
     text-align: center;
-    margin-top: 1.2em;
-    margin-bottom: 1.5em;
+    margin-top: 0.5em;
+    margin-bottom: 1.4em;
     color: #111;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 2px solid #ddd;
     padding-bottom: 0.5em;
+    clear: both;
+}
+h3.section-title {
+    font-size: 1.15em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1a1a1a;
+    margin-top: 1.5em;
+    margin-bottom: 0.7em;
+    clear: both;
 }
 p {
     margin: 0 0 0.85em 0;
@@ -638,16 +818,73 @@ p.bullet {
     text-indent: 0;
     padding-left: 1.5em;
 }
-.figure {
+
+/* Reader-optimized figures: Always centered block, no text wrapping disaster */
+figure.book-figure {
+    display: block;
+    margin: 1.6em auto;
     text-align: center;
-    margin: 1.8em auto;
+    clear: both;
+    page-break-inside: avoid;
 }
-.chapter-img {
-    max-width: 95%;
+figure.book-figure img {
+    max-width: 88%;
+    max-height: 55vh;
     height: auto;
-    display: inline-block;
+    display: block;
+    margin: 0.4em auto;
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+figcaption {
+    font-size: 0.88em;
+    line-height: 1.4;
+    font-style: italic;
+    color: #555;
+    margin-top: 0.5em;
+    text-align: center;
+}
+
+figure.fig-collage {
+    display: block;
+    margin: 2em auto;
+    text-align: center;
+    clear: both;
+    page-break-inside: avoid;
+}
+img.collage-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+blockquote.quote {
+    display: block;
+    margin: 1.4em 1.2em;
+    padding: 0.3em 0 0.3em 1.2em;
+    border-left: 3px solid #888;
+    font-style: italic;
+    color: #222;
+    line-height: 1.65;
+    text-align: justify;
+    text-justify: inter-word;
+    clear: both;
+}
+blockquote.quote p {
+    text-indent: 0;
+    margin: 0;
+}
+.ornament {
+    text-align: center;
+    margin: 1.8em auto;
+    font-size: 1.25em;
+    letter-spacing: 0.4em;
+    color: #666;
+    clear: both;
+    user-select: none;
 }
 nav#toc ol {
     list-style-type: decimal;
@@ -690,26 +927,72 @@ nav#toc a {
             manifest_items.append('        <item id="cover_page" href="Text/cover.xhtml" media-type="application/xhtml+xml"/>')
             spine_items.append('        <itemref idref="cover_page"/>')
 
-        # Write all extracted interior illustrations into OEBPS/Images/
         for img_rel_path, im_bytes in all_images_to_write:
             zf.writestr(img_rel_path, im_bytes)
 
-        # Write Chapters
         for chap_idx, chap in enumerate(chapters, 1):
             chap_filename = f'chapter_{chap_idx:03d}.xhtml'
             chap_title_esc = chap['title'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             
-            body_html = [f'        <h1 class="chapter-title">{chap_title_esc}</h1>']
-            for it in chap['items']:
-                if it['type'] == 'image':
+            body_html = []
+            if chap.get('vignette'):
+                v_src = f"../{chap['vignette']}"
+                body_html.append(f'        <div class="chapter-vignette"><img src="{v_src}" alt="Emblem"/></div>')
+            body_html.append(f'        <h1 class="chapter-title">{chap_title_esc}</h1>')
+
+            # Render items sequentially in natural reading order
+            idx = 0
+            items = chap['items']
+            while idx < len(items):
+                it = items[idx]
+                itype = it['type']
+
+                if itype == 'collage':
                     img_src = f"../{it['href']}"
-                    body_html.append(f'        <div class="figure"><img src="{img_src}" alt="Minh họa" class="chapter-img"/></div>')
-                elif it['type'] == 'paragraph':
-                    safe_p = it['text'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                    if re.match(r'^[•·*–—-]\s+', it['text']):
-                        body_html.append(f'        <p class="bullet">{safe_p}</p>')
+                    caption = it.get('caption')
+                    cap_html = f'<figcaption>{caption.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</figcaption>' if caption else ''
+                    body_html.append(f'        <figure class="fig-collage"><img src="{img_src}" alt="Ảnh minh họa" class="collage-img"/>{cap_html}</figure>')
+                    idx += 1
+                elif itype == 'image':
+                    # Group consecutive images into a single centered figure
+                    consec_imgs = [it]
+                    look_idx = idx + 1
+                    while look_idx < len(items) and items[look_idx]['type'] == 'image':
+                        consec_imgs.append(items[look_idx])
+                        look_idx += 1
+
+                    cap_text = None
+                    for ci in consec_imgs:
+                        if ci.get('caption'):
+                            cap_text = ci['caption']
+                            break
+
+                    cap_html = f'<figcaption>{cap_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</figcaption>' if cap_text else ''
+                    
+                    body_html.append('        <figure class="book-figure">')
+                    for ci in consec_imgs:
+                        c_src = f"../{ci['href']}"
+                        body_html.append(f'            <img src="{c_src}" alt="Minh họa"/>')
+                    if cap_html:
+                        body_html.append(f'            {cap_html}')
+                    body_html.append('        </figure>')
+                    idx = look_idx
+                elif itype == 'ornament':
+                    body_html.append('        <div class="ornament">⁓ ⁓ ⁓</div>')
+                    idx += 1
+                elif itype == 'text':
+                    btype = it['block_type']
+                    txt = it['text'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    if btype == 'section':
+                        body_html.append(f'        <h3 class="section-title">{txt}</h3>')
+                    elif btype == 'quote':
+                        body_html.append(f'        <blockquote class="quote"><p>{txt}</p></blockquote>')
                     else:
-                        body_html.append(f'        <p>{safe_p}</p>')
+                        if re.match(r'^[•·*–—-]\s+', txt):
+                            body_html.append(f'        <p class="bullet">{txt}</p>')
+                        else:
+                            body_html.append(f'        <p>{txt}</p>')
+                    idx += 1
 
             chap_xhtml = f'''<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>

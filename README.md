@@ -66,11 +66,14 @@ Average size reduction: **~80%** across 12 real scanned book collections — wit
 * 📱 **Full-Bleed SVG Viewport:** Edge-to-edge adaptive viewport scaling without distortion or letterboxing across all e-reader apps.
 * 📊 **Record Compression Ratio:** Compresses full 765 high-resolution pages (`2122 x 3000px`) down to just **25.51 MB** (~33 KB/page).
 ### v1.3.2
-* 📑 **Real Chapters & Working TOC Detection:** Detects genuine book chapters and headings (`Chương X`, `Phần X`, all-caps headings like `MỘT CON NGƯỜI MỘT CON ĐƯỜNG`), separates them into individual chapter XHTML files, and generates both EPUB 3 `nav.xhtml` and EPUB 2 `toc.ncx` for complete navigation support on all e-readers (Kindle, Kobo, Apple Books).
+* 📖 **Reader-Optimized In-Flow Typography:** Completely eliminated brittle CSS floats that squeezed text into narrow 1-word vertical ribbons on e-reader viewports. All illustrations, diagrams, and blockquotes now render as clean, centered, full-width in-flow elements with balanced line spacing (`1.65`) and justified text alignment.
+* 🖼️ **Multi-Image Collage Auto-Preservation:** Automatically detects complex photo collage pages (multiple tiled images with minimal text) and renders each collage as a single high-resolution, full-page plate (`figure.fig-collage`) instead of fragmenting into dozens of tiny disconnected images.
+* 🖼️ **Consecutive Illustration Grouping & Crisp Captions:** Clusters consecutive illustrations on the same page into unified, centered gallery blocks with crisp italicized `<figcaption>` captions underneath, preventing captions from merging into paragraph body text.
+* 📑 **Hierarchical Heading & Real Chapter TOC:** Intelligently distinguishes major chapter boundaries (e.g., 20pt titles like `GIAI ĐOẠN TRƯỞNG THÀNH`) from in-chapter sub-sections (e.g., 12pt titles like `NHÂN VẬT YOUNG JUMP`), creating clean, working Table of Contents (both EPUB 3 `nav.xhtml` and EPUB 2 `toc.ncx`) without premature chapter fragmentation.
+* 👑 **Centered Vignettes & Chapter Emblems:** Detects centered decorative chapter header emblems and places them cleanly above chapter titles (`.chapter-vignette`).
 * 🚫 **Running Headers & Footers Stripping:** Purges repeated top/bottom running book titles, page numbers, and site watermarks (`Chiasemoi.com`, `thuviensach`, etc.) without breaking sentences.
 * ✍️ **Natural Paragraph Merging & De-hyphenation:** Merges PDF hard line breaks and rejoins split hyphenated words (`kinh-` + `doanh` -> `kinh doanh`) into continuous, beautifully formatted `<p>` paragraphs.
 * 🔡 **Comprehensive Uppercase AVn & Dangling Diacritic Cleaners:** Decodes uppercase Vietnamese title tokens (`ĐOAẢN` -> `ĐOẠN`, `TRƯƠÃNG` -> `TRƯỞNG`, `THAÂNH` -> `THÀNH`, `VÂÅT` -> `VẬT`, `TỘT ĐÓNH` -> `TỘT ĐỈNH`) and removes trailing floating diacritics (`thiế´u` -> `thiếu`).
-* 🎨 **Modern E-Reader Typography CSS:** Responsive font sizing, comfortable 1.65 line height, balanced margins, and justified text alignment.
 
 ---
 
