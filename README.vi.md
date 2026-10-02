@@ -68,7 +68,7 @@ flowchart LR
 ## 📦 Cài Đặt
 
 **Cách 1 — App đóng gói sẵn** (không cần Python):
-Tải từ **[Releases](https://github.com/trungtypo-png/epub1t/releases)**: `Epub1t-v1.3.2-Windows.zip` hoặc `Epub1t-v1.3.2-macOS.zip`.
+Tải từ **[Releases](https://github.com/trungtypo-png/epub1t/releases)**: `Epub1t-v1.3.3-Windows.zip` hoặc `Epub1t-v1.3.3-macOS.zip`.
 
 **Cách 2 — Chạy từ source:**
 ```bash
