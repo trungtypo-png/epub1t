@@ -68,7 +68,7 @@ flowchart LR
 ## 📦 Installation
 
 **Option 1 — Standalone app** (no Python needed):
-Download from **[Releases](https://github.com/trungtypo-png/epub1t/releases)**: `Epub1t-v1.3.2-Windows.zip` or `Epub1t-v1.3.2-macOS.zip`.
+Download from **[Releases](https://github.com/trungtypo-png/epub1t/releases)**: `Epub1t-v1.3.3-Windows.zip` or `Epub1t-v1.3.3-macOS.zip`.
 
 **Option 2 — Run from source:**
 ```bash
