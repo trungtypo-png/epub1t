@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.2-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.3-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -36,20 +36,20 @@ flowchart LR
 ## 🌟 Key Features
 
 **For scanned PDFs:**
-- ⚡ **1-Bit Bilevel Compression** — 300-page book in under 25 seconds, ~80% size reduction
-- 🛡️ **Auto-Polarity Guard** — detects and fixes inverted (negative) scans automatically
-- 🧹 **Adaptive Binarization** — whitens yellowed paper, removes speckle noise
+- **1-Bit Bilevel Compression** — 300-page book in under 25 seconds, ~80% size reduction
+- **Auto-Polarity Guard** — detects and fixes inverted (negative) scans automatically
+- **Adaptive Binarization** — whitens yellowed paper, removes speckle noise
 
 **For digital PDFs:**
-- 🎯 **Auto-Detect Mode** — inspects text layer density, picks the right engine automatically
-- 🔡 **AVn / VNI Font Decoder** — fixes broken Vietnamese diacritics (`vaâo → vào`) in pre-2005 PDFs
-- 🚫 **Header/Footer/Watermark Stripping** — removes running titles, page numbers, site watermarks
-- 🖼️ **Collage & Illustration Grouping** — preserves photo montage pages and groups consecutive images
+- **Auto-Detect Mode** — inspects text layer density, picks the right engine automatically
+- **AVn / VNI Font Decoder** — fixes broken Vietnamese diacritics (`vaâo → vào`) in pre-2005 PDFs
+- **Header/Footer/Watermark Stripping** — removes running titles, page numbers, site watermarks
+- **Collage & Illustration Grouping** — preserves photo montage pages and groups consecutive images
 
 **For all formats:**
-- 🎨 **Real Cover Restoration** — replaces Calibre's generic placeholder with the actual book cover
-- 🧹 **Ghost Page Cleaner** — removes blank spacer pages and Calibre pdftohtml artifacts
-- 📱 **SVG Viewport** — edge-to-edge scaling on any e-reader screen
+- **Real Cover Restoration** — replaces Calibre's generic placeholder with the actual book cover
+- **Ghost Page Cleaner** — removes blank spacer pages and Calibre pdftohtml artifacts
+- **SVG Viewport** — edge-to-edge scaling on any e-reader screen
 
 ---
 
@@ -104,20 +104,25 @@ python scripts/fix_epub_covers.py "/path/to/books"     # restore real book cover
 
 ## 📝 Changelog
 
+### v1.3.3
+- **Cross-Page Text Flow** — paragraphs split across pages now merge seamlessly
+- **Bullet Splitting** — multiple bullets inside one PDF block correctly split into separate items
+- **Caption Fix** — body text beside images no longer falsely captured as figcaption
+
 ### v1.3.2
-- 🎯 **Auto-Detect Mode** — automatically routes digital PDFs to Reflowable EPUB and scanned PDFs to 1-Bit engine
-- 📖 **Reflowable EPUB** — out of Beta: in-flow typography, real chapter TOC, collage preservation, AVn decoding
-- 🖼️ **Collage Auto-Preservation** — photo montage pages rendered as single full-page plate
-- 📑 **Hierarchical Chapter TOC** — major chapters vs sub-sections, no false splits
-- 🚫 **Running Header/Footer Stripping** — removes watermarks without breaking text
+- **Auto-Detect Mode** — automatically routes digital PDFs to Reflowable EPUB and scanned PDFs to 1-Bit engine
+- **Reflowable EPUB** — out of Beta: in-flow typography, real chapter TOC, collage preservation, AVn decoding
+- **Collage Auto-Preservation** — photo montage pages rendered as single full-page plate
+- **Hierarchical Chapter TOC** — major chapters vs sub-sections, no false splits
+- **Running Header/Footer Stripping** — removes watermarks without breaking text
 
 ### v1.3.1
-- 🛡️ Auto-Polarity Guard for inverted scans
-- 📊 Record compression: 765 pages → 25.51 MB (~33 KB/page)
+- Auto-Polarity Guard for inverted scans
+- Record compression: 765 pages → 25.51 MB (~33 KB/page)
 
 ### v1.2.0
-- 🚀 4.5x speed boost via zero-copy direct buffer pipeline
-- 📊 Real-time per-page progress bar
+- 4.5x speed boost via zero-copy direct buffer pipeline
+- Real-time per-page progress bar
 
 ### v1.1.x
 - Native high-res scan extraction, paper whitening & anti-noise filter, full-viewport SVG

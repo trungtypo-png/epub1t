@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.2-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.3-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -36,20 +36,20 @@ flowchart LR
 ## 🌟 Tính Năng Nổi Bật
 
 **Cho PDF scan:**
-- ⚡ **Nén 1-Bit Bilevel** — 300 trang dưới 25 giây, giảm ~80% dung lượng
-- 🛡️ **Auto-Polarity Guard** — tự động phát hiện và đảo ngược ảnh âm bản
-- 🧹 **Adaptive Binarization** — làm trắng nền giấy ố vàng, lọc sạch hạt bụi/noise
+- **Nén 1-Bit Bilevel** — 300 trang dưới 25 giây, giảm ~80% dung lượng
+- **Auto-Polarity Guard** — tự động phát hiện và đảo ngược ảnh âm bản
+- **Adaptive Binarization** — làm trắng nền giấy ố vàng, lọc sạch hạt bụi/noise
 
 **Cho PDF chữ số:**
-- 🎯 **Chế độ Tự Động (Auto-Detect)** — phân tích mật độ text, tự chọn đúng luồng xử lý
-- 🔡 **Giải mã font AVn / VNI** — sửa lỗi vỡ dấu tiếng Việt (`vaâo → vào`) trong sách PDF cũ trước 2005
-- 🚫 **Khử Header / Footer / Watermark** — loại bỏ tiêu đề lặp, số trang, nhãn quảng cáo
-- 🖼️ **Bảo toàn trang ảnh ghép (Collage)** — giữ nguyên trang photo montage và gom nhóm ảnh liền kề
+- **Chế độ Tự Động (Auto-Detect)** — phân tích mật độ text, tự chọn đúng luồng xử lý
+- **Giải mã font AVn / VNI** — sửa lỗi vỡ dấu tiếng Việt (`vaâo → vào`) trong sách PDF cũ trước 2005
+- **Khử Header / Footer / Watermark** — loại bỏ tiêu đề lặp, số trang, nhãn quảng cáo
+- **Bảo toàn trang ảnh ghép (Collage)** — giữ nguyên trang photo montage và gom nhóm ảnh liền kề
 
 **Cho mọi định dạng:**
-- 🎨 **Phục hồi bìa thật** — thay bìa placeholder của Calibre bằng bìa minh họa gốc
-- 🧹 **Khử trang trắng & layer rác** — dọn sạch trang trống và artifact từ Calibre pdftohtml
-- 📱 **SVG Viewport** — tự co giãn vừa khít màn hình mọi máy đọc sách
+- **Phục hồi bìa thật** — thay bìa placeholder của Calibre bằng bìa minh họa gốc
+- **Khử trang trắng & layer rác** — dọn sạch trang trống và artifact từ Calibre pdftohtml
+- **SVG Viewport** — tự co giãn vừa khít màn hình mọi máy đọc sách
 
 ---
 
@@ -104,20 +104,25 @@ python scripts/fix_epub_covers.py "/duong/dan"     # phục hồi bìa thật
 
 ## 📝 Nhật Ký Cập Nhật
 
+### v1.3.3
+- **Nối văn bản liên trang** — đoạn văn bị cắt giữa 2 trang giờ ghép liền mạch
+- **Tách bullet chính xác** — nhiều bullet trong cùng 1 block PDF tách riêng đúng vị trí
+- **Sửa lỗi caption ảo** — văn bản thường cạnh hình ảnh không còn bị nhầm thành chú thích
+
 ### v1.3.2
-- 🎯 **Chế độ Tự Động (Auto-Detect)** — tự phân loại PDF chữ vs PDF scan, không cần chọn thủ công
-- 📖 **EPUB Chữ chính thức** — tốt nghiệp Beta: dàn trang in-flow, mục lục chương sống, bảo toàn collage
-- 🖼️ **Bảo toàn trang ảnh ghép** — trang photo montage render thành 1 tấm ảnh nguyên vẹn
-- 📑 **Mục lục phân cấp chuẩn** — phân biệt tiêu đề chương lớn và mục con, không bị split sai
-- 🚫 **Khử Header/Footer/Watermark** — bóc sạch tiêu đề lặp và nhãn quảng cáo
+- **Chế độ Tự Động (Auto-Detect)** — tự phân loại PDF chữ vs PDF scan, không cần chọn thủ công
+- **EPUB Chữ chính thức** — tốt nghiệp Beta: dàn trang in-flow, mục lục chương sống, bảo toàn collage
+- **Bảo toàn trang ảnh ghép** — trang photo montage render thành 1 tấm ảnh nguyên vẹn
+- **Mục lục phân cấp chuẩn** — phân biệt tiêu đề chương lớn và mục con, không bị split sai
+- **Khử Header/Footer/Watermark** — bóc sạch tiêu đề lặp và nhãn quảng cáo
 
 ### v1.3.1
-- 🛡️ Auto-Polarity Guard cho ảnh âm bản
-- 📊 Kỷ lục nén: 765 trang → 25.51 MB (~33 KB/trang)
+- Auto-Polarity Guard cho ảnh âm bản
+- Kỷ lục nén: 765 trang → 25.51 MB (~33 KB/trang)
 
 ### v1.2.0
-- 🚀 Tăng tốc 4.5 lần qua zero-copy direct buffer
-- 📊 Thanh tiến trình theo thời gian thực
+- Tăng tốc 4.5 lần qua zero-copy direct buffer
+- Thanh tiến trình theo thời gian thực
 
 ### v1.1.x
 - Trích xuất ảnh scan độ phân giải gốc, làm trắng nền & khử noise, SVG full-viewport
