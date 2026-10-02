@@ -706,11 +706,12 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                     except Exception:
                         pass
 
-        # Rule 5: Match Captions (small text blocks directly underneath or beside an image)
+        # Rule 5: Match Captions (small text blocks directly underneath an image)
         for im in images:
             if im['type'] == 'vignette':
                 continue
             ir = im['bbox']
+            w_img = ir[2] - ir[0]
             best_b = None
             min_dist = 999
             for b in body_blocks:
@@ -718,19 +719,26 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                     continue
                 by = b['y']
                 bx = b['bbox']
-                words = b['text'].split()
+                txt = b['text'].strip()
+                words = txt.split()
                 if len(words) > 15:
                     continue
 
-                # Case A: Directly underneath (within 30pt)
+                # Captions must not end with comma, colon, hyphen, or semicolon
+                if txt.endswith((',', ':', '-', '–', '—', ';')):
+                    continue
+                # Captions must not be dialogue lines
+                if re.match(r'^(?:Gates|Time|Roberts|Allen):', txt):
+                    continue
+
+                # Width check: caption cannot be much wider than the image if image is narrow
+                w_b = bx[2] - bx[0]
+                if w_b > w_img * 1.5 and w_img < 250:
+                    continue
+
+                # Directly underneath (within 30pt)
                 if 0 <= (by - ir[3]) <= 30 and (bx[0] <= ir[2] + 25 and bx[2] >= ir[0] - 25):
                     dist = by - ir[3]
-                    if dist < min_dist:
-                        min_dist = dist
-                        best_b = b
-                # Case B: Beside image (vertical overlap, within 45pt horizontally)
-                elif abs(by - ir[1]) <= 35 and (0 <= bx[0] - ir[2] <= 45):
-                    dist = abs(by - ir[1]) + 10
                     if dist < min_dist:
                         min_dist = dist
                         best_b = b
@@ -739,6 +747,14 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                 im['caption'] = best_b['text']
                 if best_b in body_blocks:
                     body_blocks.remove(best_b)
+
+        # Ensure section titles beside or at the top of an image come before the image
+        for sec in body_blocks:
+            if sec['block_type'] == 'section':
+                for im in images:
+                    if im['type'] != 'vignette':
+                        if abs(sec['y'] - im['bbox'][1]) <= 25:
+                            sec['y'] = min(sec['y'], im['y']) - 0.5
 
         elements.extend(images)
         elements.extend(body_blocks)
