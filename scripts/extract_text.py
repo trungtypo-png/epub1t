@@ -591,15 +591,20 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                         if 'bold' in s['font'].lower():
                             is_bold = True
 
-                full_block_text = ' '.join(b_lines).strip()
+                cleaned_lines = []
+                for l_str in b_lines:
+                    if page_is_avn:
+                        cl = clean_vietnamese_text(l_str)
+                    else:
+                        cl = re.sub(r'([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\^~´`]', r'\1', l_str)
+                    cl = cl.strip()
+                    if cl:
+                        cleaned_lines.append(cl)
+
+                full_block_text = ' '.join(cleaned_lines).strip()
                 full_block_text = re.sub(r'\s+', ' ', full_block_text)
                 if not full_block_text:
                     continue
-
-                if page_is_avn:
-                    full_block_text = clean_vietnamese_text(full_block_text)
-                else:
-                    full_block_text = re.sub(r'([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\^~´`]', r'\1', full_block_text)
 
                 bx = b['bbox']
                 by0 = bx[1]
@@ -631,6 +636,35 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                         'text': full_block_text,
                         'bbox': bx
                     })
+                    continue
+
+                # Bullet points within block
+                has_bullet = any(re.match(r'^[•·*–—-]\s+', l) for l in cleaned_lines)
+                if has_bullet:
+                    paras = []
+                    curr_b_lines = []
+                    for cl in cleaned_lines:
+                        if re.match(r'^[•·*–—-]\s+', cl):
+                            if curr_b_lines:
+                                paras.append(' '.join(curr_b_lines).strip())
+                                curr_b_lines = []
+                            curr_b_lines.append(cl)
+                        else:
+                            curr_b_lines.append(cl)
+                    if curr_b_lines:
+                        paras.append(' '.join(curr_b_lines).strip())
+
+                    for p_sub_idx, p_txt in enumerate(paras):
+                        p_txt = re.sub(r'\s+', ' ', p_txt).strip()
+                        if not p_txt:
+                            continue
+                        body_blocks.append({
+                            'y': by0 + p_sub_idx * 0.01,
+                            'type': 'text',
+                            'block_type': 'p',
+                            'text': p_txt,
+                            'bbox': bx
+                        })
                     continue
 
                 # Quotes
@@ -738,6 +772,58 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
             pending_chapter_heading = []
             pending_vignette = None
 
+    def merge_text_into_prev(prev_el, curr_el):
+        prev_txt = prev_el['text'].rstrip()
+        curr_txt = curr_el['text'].lstrip()
+        
+        # De-hyphenation handling
+        if prev_txt.endswith(('-', '—', '–')):
+            if prev_txt.endswith((' -', ' —', ' –')):
+                prev_el['text'] = prev_txt + ' ' + curr_txt
+            else:
+                prev_el['text'] = prev_txt[:-1].rstrip() + ' ' + curr_txt
+        else:
+            prev_el['text'] = prev_txt + ' ' + curr_txt
+        
+        if 'bbox' in prev_el and 'bbox' in curr_el:
+            bx1 = prev_el['bbox']
+            bx2 = curr_el['bbox']
+            prev_el['bbox'] = (min(bx1[0], bx2[0]), bx1[1], max(bx1[2], bx2[2]), bx2[3])
+
+    def should_merge_elements(prev_el, curr_el):
+        if prev_el.get('type') != 'text' or curr_el.get('type') != 'text':
+            return False
+        
+        p_btype = prev_el.get('block_type')
+        c_btype = curr_el.get('block_type')
+        
+        # Only merge body paragraphs ('p') and quotes ('quote')
+        if p_btype not in ('p', 'quote') or c_btype not in ('p', 'quote'):
+            return False
+
+        curr_txt = curr_el.get('text', '').strip()
+        prev_txt = prev_el.get('text', '').strip()
+        if not curr_txt or not prev_txt:
+            return False
+
+        # Never merge if current element itself is a new bullet point
+        if re.match(r'^[•·*–—-]\s+', curr_txt):
+            return False
+
+        # Check terminal punctuation on prev_txt
+        is_terminal = bool(re.search(r'[.!?:;…][”"\'’»\)]*$', prev_txt))
+        first_char = curr_txt[0]
+
+        # Merge condition 1: previous paragraph was cut mid-sentence (no terminal punct)
+        if not is_terminal:
+            return True
+
+        # Merge condition 2: current starts with lowercase letter (continuation of sentence)
+        if first_char.islower():
+            return True
+
+        return False
+
     for p_info in pages_elements:
         p_num = p_info['page_num']
         elems = p_info['elements']
@@ -756,7 +842,12 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
             else:
                 if pending_chapter_heading:
                     commit_pending_heading(p_num)
-                current_chapter['items'].append(el)
+                
+                # Check if this element should be merged into the previous item of current chapter
+                if current_chapter['items'] and should_merge_elements(current_chapter['items'][-1], el):
+                    merge_text_into_prev(current_chapter['items'][-1], el)
+                else:
+                    current_chapter['items'].append(el)
 
     if pending_chapter_heading:
         commit_pending_heading(total_pages)
