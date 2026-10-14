@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.3-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.4-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -103,6 +103,10 @@ python scripts/fix_epub_covers.py "/path/to/books"     # restore real book cover
 ---
 
 ## 📝 Changelog
+
+### v1.3.4
+- **Preserve Metadata & Ornament Line Breaks** — colophon lines (`Tác giả:`, `Năm xuất bản:`, etc.), web links, and dividers (`—★—`) are cleanly separated
+- **Multi-Tiered Text Flow** — maintains seamless narrative sentence merging while protecting structured metadata and poetry
 
 ### v1.3.3
 - **Cross-Page Text Flow** — paragraphs split across pages now merge seamlessly

@@ -259,6 +259,29 @@ def is_chapter_heading(line):
     return False
 
 
+def is_meta_or_ornament(text):
+    """
+    Detects metadata/colophon lines, website URLs, dividers, ornaments, and short section markers:
+    e.g. 'Tác giả: ...', 'Năm xuất bản: ...', 'thuvien-ebook.com', '—★—', '***', 'Chương 1', 'I'
+    """
+    t = text.strip()
+    if not t:
+        return False
+    # Divider / ornament
+    if re.match(r'^[—–\-*★#~=\s]{2,}$', t):
+        return True
+    # Web URL / Email
+    if re.search(r'^(?:https?://|www\.|\S+@\S+|[\w.-]+\.(?:com|vn|net|org|edu|info))\b', t, re.IGNORECASE):
+        return True
+    # Key: Value pattern (Tác giả: ..., Năm xuất bản: ..., etc.)
+    if re.match(r'^[A-ZÀ-Ỹa-zà-ỹ0-9\s]{2,35}\s*:\s*.+', t):
+        return True
+    # Short section marker like "Chương 1", "Hồi thứ nhất", Roman numerals "I", "II"
+    if re.match(r'^(?:Chương|Hồi|Phần|Mục|Bài)\s+[\w\d]+', t, re.IGNORECASE) or re.match(r'^[IVXLCDM]+\.?$', t):
+        return True
+    return False
+
+
 def lines_to_paragraphs(lines):
     """
     Intelligently joins lines into natural reflowable paragraphs:
@@ -667,6 +690,19 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
                         })
                     continue
 
+                # Intra-block metadata / colophon line splitting
+                has_meta = len(cleaned_lines) > 1 and any(is_meta_or_ornament(cl) for cl in cleaned_lines)
+                if has_meta:
+                    for p_sub_idx, cl in enumerate(cleaned_lines):
+                        body_blocks.append({
+                            'y': by0 + p_sub_idx * 0.01,
+                            'type': 'text',
+                            'block_type': 'p',
+                            'text': cl,
+                            'bbox': bx
+                        })
+                    continue
+
                 # Quotes
                 if full_block_text.startswith(('“', '"', '‘', '”', '– “', '— “')):
                     body_blocks.append({
@@ -826,16 +862,31 @@ def export_pdf_to_reflowable_epub(pdf_path, epub_path=None, ocr_lang='vie', tess
         if re.match(r'^[•·*–—-]\s+', curr_txt):
             return False
 
+        # Never merge if current or previous is metadata, ornament, or section marker
+        if is_meta_or_ornament(curr_txt) or is_meta_or_ornament(prev_txt):
+            return False
+
         # Check terminal punctuation on prev_txt
         is_terminal = bool(re.search(r'[.!?:;…][”"\'’»\)]*$', prev_txt))
-        first_char = curr_txt[0]
+        if is_terminal:
+            return False
 
-        # Merge condition 1: previous paragraph was cut mid-sentence (no terminal punct)
-        if not is_terminal:
+        # At this point, prev_txt does NOT end in terminal punctuation.
+
+        # Case 1: curr_txt starts with lowercase (sentence continues with normal word)
+        if curr_txt[0].islower():
             return True
 
-        # Merge condition 2: current starts with lowercase letter (continuation of sentence)
-        if first_char.islower():
+        # Case 2: prev_txt ends with hyphen or comma (hyphenated word or mid-clause continuation)
+        if prev_txt.endswith(('-', '—', '–', ',')):
+            return True
+
+        # Case 3: prev_txt ends with incomplete grammatical conjunction / preposition
+        if re.search(r'\b(?:là|với|và|của|tại|trong|cho|rằng|thì|mà|đến|ở|do|từ|được|bị|như|về|lên|ra|vào|hay|hoặc|nhưng)\s*$', prev_txt, re.IGNORECASE):
+            return True
+
+        # Case 4: prev_txt is a substantive body paragraph (>= 50 chars) and curr_txt is not all-caps
+        if len(prev_txt) >= 50 and not curr_txt.isupper():
             return True
 
         return False

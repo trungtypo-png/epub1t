@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.3.3-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.4-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 
 ---
 
@@ -103,6 +103,10 @@ python scripts/fix_epub_covers.py "/duong/dan"     # phục hồi bìa thật
 ---
 
 ## 📝 Nhật Ký Cập Nhật
+
+### v1.3.4
+- **Bảo toàn dòng thông tin xuất bản & ký hiệu** — các dòng thông tin (`Tác giả:`, `Năm xuất bản:`, `Số trang:`...), link web và dấu hoa thị phân cách (`—★—`) được xuống dòng riêng biệt, chuẩn như PDF
+- **Nối câu thông minh đa tầng** — giữ trọn mạch văn xuôi liên trang nhưng không gộp nhầm dữ liệu có cấu trúc hoặc thơ ca
 
 ### v1.3.3
 - **Nối văn bản liên trang** — đoạn văn bị cắt giữa 2 trang giờ ghép liền mạch
