@@ -7,6 +7,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Release](https://img.shields.io/badge/Release-v1.3.4-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-trungtypo-ff5e5b?style=flat&logo=kofi&logoColor=white)](https://ko-fi.com/trungtypo)
 
 ---
 
@@ -145,6 +146,25 @@ python scripts/fix_epub_covers.py "/path/to/books"     # restore real book cover
 ## 🤖 AI Agent Skill
 
 Includes [`SKILL.md`](./SKILL.md) for use with **Google Antigravity** or other AI agent frameworks.
+
+---
+
+## ☕ Support the Project / Ủng hộ
+
+If you find epub1t useful and want to support its maintenance:
+
+<a href="https://ko-fi.com/trungtypo" target="_blank"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy Me a Coffee at ko-fi.com" height="34"></a>
+
+<details>
+<summary>☕ <b>Ủng hộ qua Vietcombank (VietQR)</b></summary>
+<br>
+
+<img src="assets/vietqr.png" alt="Vietcombank QR" width="220" />
+
+- **Chủ tài khoản:** DINH TOAN TRUNG
+- **Số tài khoản:** `9346829005`
+- **Ngân hàng:** Vietcombank (VCB)
+</details>
 
 ---
 
