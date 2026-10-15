@@ -8,6 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Release](https://img.shields.io/badge/Release-v1.3.4-green.svg)](https://github.com/trungtypo-png/epub1t/releases)
 [![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-trungtypo-ff5e5b?style=flat&logo=kofi&logoColor=white)](https://ko-fi.com/trungtypo)
+[![VietQR Donate](https://img.shields.io/badge/VietQR-Donate-005a3c?style=flat)](assets/vietqr.png)
 
 ---
 
@@ -154,16 +155,13 @@ python scripts/fix_epub_covers.py "/duong/dan"     # phục hồi bìa thật
 Nếu bạn thấy epub1t hữu ích và giúp bạn tiết kiệm thời gian đọc sách, bạn có thể mời mình một tách cà phê:
 
 <a href="https://ko-fi.com/trungtypo" target="_blank"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy Me a Coffee at ko-fi.com" height="34"></a>
+<a href="assets/vietqr.png"><img src="https://img.shields.io/badge/VietQR-Donate-005a3c?style=for-the-badge" alt="VietQR" height="34"></a>
 
 <details>
-<summary>☕ <b>Ủng hộ qua Vietcombank (VietQR)</b></summary>
+<summary>☕ <b>Quét mã VietQR</b></summary>
 <br>
 
-<img src="assets/vietqr.png" alt="Vietcombank QR" width="220" />
-
-- **Chủ tài khoản:** DINH TOAN TRUNG
-- **Số tài khoản:** `9346829005`
-- **Ngân hàng:** Vietcombank (VCB)
+<img src="assets/vietqr.png" alt="VietQR" width="250" />
 </details>
 
 ---
